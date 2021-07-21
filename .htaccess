@@ -1,0 +1,26 @@
+#Denegar acceso directorios sin index
+Options -Indexes
+# Denegar acceso a los siguientes archivos
+<FilesMatch "\.(htaccess|sql)$">
+Order Allow,Deny
+Deny from all
+</FilesMatch>
+#Archivo que no exista se redireccionara al index.php
+<IfModule mod_rewrite.c>
+#Desactivar multivistas
+Options -Multiviews
+#Rescritura amigable
+RewriteEngine On
+RewriteBase /FRAMEWORK_PHP/
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ)]+)$ index.php?url=$1 [QSA,L]
+</IfModule>
+#Establece tamaño de archivos de transferencia
+#php_value upload_max_filesize 200M
+#php_value post_max_size 200M
+#php_value max_execution_time 1000
+#php_value max_input_time 1000
+
+ErrorDocument 404 /FRAMEWORK_PHP/Vista/error/404_View.php
+ErrorDocument 404 /FRAMEWORK_PHP/Vista/error/400_View.php
