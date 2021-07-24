@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <?php require_once RUTA_APP . "Includ/head.php";?>
-    <title><?php echo NOMBRESITIO;?></title>
+    <title>Error 404</title>
 </head>
 <body>
-    <h1>Errro 404</h1>
+    <h1>Error 404</h1>
 </body>
 </html>

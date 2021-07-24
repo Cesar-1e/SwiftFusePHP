@@ -1,0 +1,2 @@
+RewriteBase /Framework_PHP/
+RewriteRule ^([-a-zA-Z0-9/.]+)$ index.php?url=Archivos/$1 [QSA,L]

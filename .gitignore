@@ -1,1 +1,3 @@
 Errores/Error.log
+Archivos/*
+!Archivos/.htaccess
