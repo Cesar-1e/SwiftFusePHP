@@ -6,8 +6,12 @@ class File
     public function load($file)
     {
         $file = RUTA_APP . $file;
+        if(is_dir($file)){
+            error(403);
+        }
         if(file_exists($file)){
-            include $file;
+            header('Content-Type: ' . mime_content_type($file));
+            readfile($file);
         }else{
             error(404);
         }

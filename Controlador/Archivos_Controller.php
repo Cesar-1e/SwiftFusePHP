@@ -9,7 +9,7 @@ class ArchivosControl extends File
     public function cargaVista($archivo, $data){
         $ruta = "Archivos/" . $archivo;
         if(count($data) > 0){
-            $ruta .= implode("/", $data);
+            $ruta .= "/" . implode("/", $data);
         }
         $this->load($ruta);
     }

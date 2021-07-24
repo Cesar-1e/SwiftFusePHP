@@ -22,6 +22,7 @@ define("LOGO", (RUTA_URL . ""));
 define("VERSION", "Alpha");
 //Errores del sitio
 define("ERROR404", RUTA_URL . "Error/404");
+define("ERROR403", RUTA_URL . "Error/403");
 define("ERROR400", RUTA_URL . "Error/400");
 define("DESARROLLO", RUTA_URL . "Error/desarrollo");
 
@@ -40,6 +41,9 @@ function error($code){
             break;
         case 400:
             $auxUrl = ERROR400;
+            break;
+        case 403:
+            $auxUrl = ERROR403;
             break;
         default:
             $auxUrl = ERROR404;
