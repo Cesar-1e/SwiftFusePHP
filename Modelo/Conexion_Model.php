@@ -115,8 +115,9 @@ class Conexion
 
     public function __destruct()
     {
-        $dbh = null;
-        $stmt = null;
+        $this->exec('KILL CONNECTION_ID()');
+        $this->dbh = null;
+        $this->stmt = null;
     }
 }
  

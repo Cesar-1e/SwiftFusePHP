@@ -34,7 +34,7 @@ define("DESARROLLO", RUTA_URL . "Error/desarrollo");
  * @return void
  */
 function error($code){
-    $auxUrl;
+    $auxUrl = ERROR404;
     switch ($code) {
         case 404:
            $auxUrl = ERROR404;
@@ -44,9 +44,6 @@ function error($code){
             break;
         case 403:
             $auxUrl = ERROR403;
-            break;
-        default:
-            $auxUrl = ERROR404;
             break;
     }
     die(header("location: " . $auxUrl));
