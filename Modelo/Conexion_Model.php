@@ -84,6 +84,10 @@ class Conexion
         $this->execute();
         return $this->stmt->rowCount();
     }
+
+    public function closeCursor(){
+        return $this->stmt->closeCursor();
+    }
  
     //Iniciar Transaccion
     public function transaction(){
