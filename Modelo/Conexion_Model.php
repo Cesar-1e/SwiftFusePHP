@@ -26,7 +26,8 @@ class Conexion
         }
     }
 
-    public function getError(){
+    public function getError()
+    {
         return $this->error;
     }
 
@@ -54,74 +55,106 @@ class Conexion
                     break;
             }
         }
-        $this->stmt->bindValue($parametro, $valor, $tipo);        
+        $this->stmt->bindValue($parametro, $valor, $tipo);
     }
 
     //Ejecuta la consulta
-    public function execute(){
-        try{
+    public function execute()
+    {
+        try {
             return $this->stmt->execute();
-        }catch(PDOException $ex){
+        } catch (PDOException $ex) {
             $this->error = $ex->getMessage();
             return null;
         }
     }
 
+    public function isConnected()
+    {
+        try {
+            $this->query('SELECT 1');
+            if ($this->execute() == null) $this->__construct();
+        } catch (PDOException $ex) {
+            $this->__construct();
+        }
+    }
+
     //Obtener los objetos
-    public function getObjects(){
+    public function getObjects()
+    {
         $this->execute();
         return $this->stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     //Obtener un solo objeto
-    public function getObjec(){
+    public function getObjec()
+    {
         $this->execute();
         return $this->stmt->fetch(PDO::FETCH_OBJ);
     }
 
     //Obtener cantidad de filas
-    public function getRecord(){
+    public function getRecord()
+    {
         $this->execute();
         return $this->stmt->rowCount();
     }
 
-    public function closeCursor(){
+    public function getArray()
+    {
+        $this->execute();
+        return $this->stmt->fecthAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllData()
+    {
+        $this->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function closeCursor()
+    {
         return $this->stmt->closeCursor();
     }
- 
+
     //Iniciar Transaccion
-    public function transaction(){
+    public function transaction()
+    {
         $this->dbh->beginTransaction();
     }
 
     //Ejecutar Sentencia de Transacción
-    public function exec($sql){
+    public function exec($sql)
+    {
         $this->dbh->exec($sql);
     }
 
     //Confirmar Transacción
     //Return bool
-    public function commit(){
-        try{
+    public function commit()
+    {
+        try {
             $this->dbh->commit();
             return true;
-        }catch(PDOException $ex){
+        } catch (PDOException $ex) {
             $this->error = $ex->getMessage();
             return false;
         }
     }
 
     //Cancelar Transacción
-    public function rollBack(){
+    public function rollBack()
+    {
         $this->dbh->rollBack();
     }
     //
 
     public function __destruct()
     {
-        $this->exec('KILL CONNECTION_ID()');
-        $this->dbh = null;
-        $this->stmt = null;
+        $this->query('KILL CONNECTION_ID()');
+        if ($this->execute()) {
+            $this->dbh = null;
+            $this->stmt = null;
+        }
     }
 }
- 
