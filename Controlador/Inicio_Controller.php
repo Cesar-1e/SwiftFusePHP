@@ -5,6 +5,6 @@
  */
 class InicioControl extends Controlador
 {
-    private $folder = "inicio";
+    protected $folder = "inicio";
 }
  ?>

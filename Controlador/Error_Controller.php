@@ -5,6 +5,6 @@
  */
 class ErrorControl extends Controlador
 {
-    private $folder = "error";
+    protected $folder = "error";
 }
  ?>
