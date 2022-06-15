@@ -5,9 +5,8 @@ require_once RUTA_APP . "Libreria/File.php";
  */
 class ArchivosControl extends File
 {
-
     public function cargaVista($archivo, $data){
-        $ruta = "Archivos/" . $archivo;
+        $ruta = "/" . $archivo;
         if(count($data) > 0){
             $ruta .= "/" . implode("/", $data);
         }
