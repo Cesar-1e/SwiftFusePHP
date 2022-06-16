@@ -1,8 +1,12 @@
 <?php
-//Se encarga de abrir el archivo
+/**
+ * Se encarga en visualizar el file
+ */
 class File
 {
-    //Cargar archivo
+    /**
+     * Cargar archivo
+     */
     public function load($file)
     {
         $file = RUTA_APP . $file;

@@ -1,6 +1,8 @@
 <?php
- //Mapear URL
 
+ /**
+  * Mapear URL
+  */
 class Core
 {
     protected $controladorActual = "Inicio";
@@ -8,7 +10,6 @@ class Core
     protected $vista = "index";
     protected $parametros = [];
 
-    //Constrcutor sin parametros
     public function __construct()
     {
         $url = $this->getUrl();
@@ -43,16 +44,21 @@ class Core
 
     }
 
-    /*
-    0 -> Controlador
-    1 -> Metodo
-    2>= -> Parametro(s)
-    */
+    /**
+     * Obtiene la url en un array
+     * 
+     * [0] -> Controlador
+     * 
+     * [1] -> Metodo
+     * 
+     * [2]>= -> Parametro(s)
+     * 
+     * @return array
+     */
     private function getUrl()
     {
         if (isset($_GET["url"])) {
             $url = rtrim($_GET["url"], '/');
-            //$url = filter_var($url, FILTER_SANITIZE_URL);
             $url = explode('/', $url);
             return $url;
         }

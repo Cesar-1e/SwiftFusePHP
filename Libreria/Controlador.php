@@ -1,9 +1,8 @@
 <?php
-//Controlador Principal
-//Se encarga de poder cargar los modelos y las vistas
-
 /**
- * Clase abstract encarga en estar en todos los controladores del framework.
+ * Controlador Principal
+ * 
+ * Clase abstract encargada en estar en todos los controladores del framework.
  * Para su optimo funcionamiento se debe crear el siguiente atributo
  * private $folder = "{El folder donde se encuentran los views}";
  */
@@ -27,7 +26,13 @@ abstract class Controlador
         }
     }
 
-    //Cargar Modelo
+    /**
+     * Require el modelo y return instanciado el object
+     * 
+     * @var $modelo El modelo a requerir e instanciar
+     * 
+     * @return Object
+     */
     public function modelo($modelo)
     {
         require_once "Modelo/" . $modelo . "_Model.php";
@@ -35,19 +40,36 @@ abstract class Controlador
         return new $modelo;
     }
 
-    //Cargar Vista
+        
+    /**
+     * Require vista, Se le da prioriodad el .html, luego el .php
+     *
+     * En el caso de que la vista no existe, se redirreciona al error 404
+     * @param  string $vista Vista a visualizar
+     * @param  array $parametro parametros para enviar a la vista; Opcional
+     * @return void
+     */
     public function vista($vista, $parametro = [])
     {
         $vista = lcfirst($vista);
-        if (file_exists("Vista/" . $vista . "_View.html")) {
-            require_once "Vista/" . $vista . "_View.html";
-        } else if(file_exists("Vista/" . $vista . "_View.php")){
-            require_once "Vista/" . $vista . "_View.php";
-        }else{
-            error(404);
+        $extensions = array("html", "php");
+        $isExist = false;
+        foreach ($extensions as $extension) {
+            $file = "Vista/" . $vista . "_View." . $extension;
+            if (file_exists($file)) {
+                $isExist = true;
+                require_once $file;
+                break;
+            }
         }
+        ($isExist ?: error(404));
     }
-
+    
+    /**
+     * Realiza un echo con el contenido del atributo $retorno en String JSON
+     *
+     * @return void
+     */
     private function retornar()
     {
         echo json_encode($this->retorno);
