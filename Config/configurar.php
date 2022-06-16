@@ -9,7 +9,7 @@ define("DATABASE", "");
 define("LOCALDIR", "Framework_PHP/");
 
 define("LANG", "es");
-define("IS_SSL", true);
+define("IS_SSL", false);
 define("CLAVE_RECAPTCHA_V3", "");
 
 //Ruta app
@@ -18,9 +18,9 @@ define("RUTA_APP", dirname(dirname(__FILE__)) . "/");
 $http = "http" . (IS_SSL ? "s" : "");
 $aux =  $http . "://" . $_SERVER['SERVER_NAME'];
 if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) { //Puerto personalizado
-    $aux .= ":" . $_SERVER["SERVER_PORT"] . LOCALDIR;
+    $aux .= ":" . $_SERVER["SERVER_PORT"];
 }
-$aux .= LOCALDIR;
+$aux .= "/" . LOCALDIR;
 define("RUTA_URL", $aux);
 //Nombre del sitio
 define("NOMBRESITIO", "");

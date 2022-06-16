@@ -6,5 +6,5 @@
 <link href="<?php echo RUTA_URL;?>CSS/style.css" rel="stylesheet">
 
 <script>
-    const RUTA = <?php echo RUTA_URL?>;
+    const RUTA = "<?php echo RUTA_URL?>";
 </script>
