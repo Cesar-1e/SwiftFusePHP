@@ -15,8 +15,10 @@ define("CLAVE_RECAPTCHA_V3", "");
 
 //Nombre del sitio
 define("NOMBRESITIO", "");
-define("LOGO", (RUTA_URL . ""));
-define("LOGOSVG", (RUTA_URL . ""));
+//define("LOGO", (RUTA_URL . ""));
+define("LOGO", (""));
+//define("LOGOSVG", (RUTA_URL . ""));
+define("LOGOSVG", (""));
 define("EMAIL", "");
 //Versión del sitio
 define("VERSION", "PreAlpha");
