@@ -4,11 +4,11 @@
  * 
  * Clase abstract encargada en estar en todos los controladores del framework.
  * Para su optimo funcionamiento se debe crear el siguiente atributo
- * private $folder = "{El folder donde se encuentran los views}";
+ * protected $folder = "{El folder donde se encuentran los views}";
  */
 abstract class Controlador
 {
-    private $retorno = array("mensaje" => null, "exito" => false, "data" => null);
+    protected $retorno = array("mensaje" => null, "exito" => false, "data" => null);
     
     /**
      * Metodo por Default
@@ -70,7 +70,7 @@ abstract class Controlador
      *
      * @return void
      */
-    private function retornar()
+    protected function retornar()
     {
         echo json_encode($this->retorno);
     }

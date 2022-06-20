@@ -1,17 +1,4 @@
 <?php
-date_default_timezone_set("America/Bogota");
-//Configuración de acceso a la base de datos
-//Local
-define("HOST", "localhost");
-define("USERNAME", "root");
-define("PASSWORD", "");
-define("DATABASE", "");
-define("LOCALDIR", "Framework_PHP/");
-
-define("LANG", "es");
-define("IS_SSL", false);
-define("CLAVE_RECAPTCHA_V3", "");
-
 //Ruta app
 define("RUTA_APP", dirname(dirname(__FILE__)) . "/");
 //Ruta url
@@ -22,12 +9,7 @@ if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) { //Puer
 }
 $aux .= "/" . LOCALDIR;
 define("RUTA_URL", $aux);
-//Nombre del sitio
-define("NOMBRESITIO", "");
-define("LOGO", (RUTA_URL . ""));
-define("LOGOSVG", (RUTA_URL . ""));
-define("EMAIL", "");
-//Versión del sitio
+//Versión del framework
 define("VERSION_FRAMEWORK", "Beta");
 //Errores del sitio
 define("ERROR404", RUTA_URL . "Error/404");
@@ -35,7 +17,6 @@ define("ERROR403", RUTA_URL . "Error/403");
 define("ERROR400", RUTA_URL . "Error/400");
 define("DESARROLLO", RUTA_URL . "Error/desarrollo");
 define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
-
 
 /**
  * Redirecciona a la vista con su código de error
