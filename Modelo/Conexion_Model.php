@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Clase encarga en realizar la conexión mediante PDO a mysql
