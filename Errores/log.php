@@ -68,7 +68,7 @@
 		         
 		    //$message = "<hr><div class='label label-danger'><b>$typestr: </b>$errstr<b> IN FILE: </b>$errfile</div><hr><pre>".$content."</pre>";
 		    if(LOG_ERRORS)
-		    $report = "[".date("Y-m-d h:m:s")."] [$typestr: $errstr] [IN FILE $errfile] [LINE $errline]\n";
+		    $report = "[".date("Y-m-d h:i:s")."] [$typestr: $errstr] [IN FILE $errfile] [LINE $errline]\n";
 		    error_log($report, 3, RUTA_APP ."Errores/error.log");
 		        
 		    if(!($errno & ERROR_REPORTING))

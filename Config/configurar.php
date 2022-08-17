@@ -1,22 +1,26 @@
 <?php
 //Ruta app
 define("RUTA_APP", dirname(dirname(__FILE__)) . "/");
-//Ruta url
-$http = "http" . (IS_SSL ? "s" : "");
-$aux =  $http . "://" . $_SERVER['SERVER_NAME'];
-if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) { //Puerto personalizado
-    $aux .= ":" . $_SERVER["SERVER_PORT"];
+function is_ssl($bool)
+{
+    define("IS_SSL", $bool);
+    //Ruta url
+    $http = "http" . (IS_SSL ? "s" : "");
+    $aux =  $http . "://" . $_SERVER['SERVER_NAME'];
+    if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) { //Puerto personalizado
+        $aux .= ":" . $_SERVER["SERVER_PORT"];
+    }
+    $aux .= "/" . LOCALDIR;
+    define("RUTA_URL", $aux);
+    //Errores del sitio
+    define("ERROR404", RUTA_URL . "Error/404");
+    define("ERROR403", RUTA_URL . "Error/403");
+    define("ERROR400", RUTA_URL . "Error/400");
+    define("DESARROLLO", RUTA_URL . "Error/desarrollo");
+    define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
-$aux .= "/" . LOCALDIR;
-define("RUTA_URL", $aux);
 //Versión del framework
 define("VERSION_FRAMEWORK", "Beta");
-//Errores del sitio
-define("ERROR404", RUTA_URL . "Error/404");
-define("ERROR403", RUTA_URL . "Error/403");
-define("ERROR400", RUTA_URL . "Error/400");
-define("DESARROLLO", RUTA_URL . "Error/desarrollo");
-define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 
 /**
  * Redirecciona a la vista con su código de error

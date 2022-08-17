@@ -10,7 +10,7 @@ define("DATABASE", "");
 define("LOCALDIR", "Framework_PHP/");
 
 define("LANG", "es");
-define("IS_SSL", false);
+is_ssl(false);
 define("CLAVE_RECAPTCHA_V3", "");
 
 //Nombre del sitio
