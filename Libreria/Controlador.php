@@ -1,4 +1,5 @@
 <?php
+require_once RUTA_APP . "Libreria/Controlador.user.php";
 /**
  * Controlador Principal
  * 
@@ -6,9 +7,10 @@
  * Para su optimo funcionamiento se debe crear el siguiente atributo
  * protected $folder = "{El folder donde se encuentran los views}";
  */
-abstract class Controlador
+abstract class Controlador extends ControladorUser
 {
     protected $retorno = array("mensaje" => null, "exito" => false, "data" => null);
+    protected $folder = "";
     
     /**
      * Metodo por Default
