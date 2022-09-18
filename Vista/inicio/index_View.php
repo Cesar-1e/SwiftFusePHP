@@ -17,6 +17,7 @@
     <br>
     <button id="btnListPeople" onclick="list(this)">Listar personas en JSON</button>
     <br>
+    <br>
     <div id="dvListPeople">
 
     </div>

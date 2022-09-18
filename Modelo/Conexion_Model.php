@@ -11,6 +11,7 @@ class Conexion
     private $dbh;
     private $stmt;
     private $error = null;
+    private $isExecuted = false;
     
     /**
      * Configura la conexiín y crea una instancia de PDO
@@ -55,6 +56,7 @@ class Conexion
     public function query($sql)
     {
         $this->stmt = $this->dbh->prepare($sql);
+        $this->isExecuted = false;
     }
 
         
@@ -96,7 +98,7 @@ class Conexion
     public function execute()
     {
         try {
-            return $this->stmt->execute();
+            return ($this->isExecuted ?: $this->isExecuted = $this->stmt->execute());
         } catch (PDOException $ex) {
             $this->error = $ex->getMessage();
             return false;
