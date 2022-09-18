@@ -75,6 +75,7 @@ abstract class Controlador extends ControladorUser
     protected function retornar()
     {
         echo json_encode($this->retorno);
+        die();
     }
 }
  

@@ -4,9 +4,9 @@ date_default_timezone_set("America/Bogota");
 //Configuración de acceso a la base de datos
 //Local
 define("HOST", "localhost");
-define("USERNAME", "root");
-define("PASSWORD", "");
-define("DATABASE", "");
+define("USERNAME", "remoto");
+define("PASSWORD", "123456");
+define("DATABASE", "framework_test");
 define("LOCALDIR", "Framework_PHP/");
 
 define("LANG", "es");

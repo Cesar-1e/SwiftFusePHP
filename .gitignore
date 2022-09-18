@@ -1,4 +1,4 @@
-Errores/Error.log
+Errores/error.log
 Archivos/*
 !Archivos/.htaccess
 .vscode

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <?php require_once RUTA_APP . "Includ/head.php";?>
+    <script src="<?= RUTA_URL;?>JS/person.js"></script>
     <title><?php echo NOMBRESITIO;?></title>
 </head>
 <body>
@@ -12,6 +13,13 @@
     <button onclick="btnLoadExample(this)">Reestablecer buttons</button>
 
     <p id="currency">2050.55</p>
+
+    <br>
+    <button id="btnListPeople" onclick="list(this)">Listar personas en JSON</button>
+    <br>
+    <div id="dvListPeople">
+
+    </div>
 
     <script>
         onload(() => {
