@@ -20,7 +20,7 @@ function is_ssl($bool)
     define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
 //Versión del framework
-define("VERSION_FRAMEWORK", "Beta");
+define("VERSION_FRAMEWORK", "0.1");
 
 /**
  * Redirecciona a la vista con su código de error
