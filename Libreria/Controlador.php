@@ -38,7 +38,8 @@ abstract class Controlador extends ControladorUser
     public function modelo($modelo)
     {
         require_once "Modelo/" . $modelo . "_Model.php";
-        $modelo .= "Mode";
+        $modelo = explode("/", $modelo);
+        $modelo = $modelo[count($modelo)-1] . "Mode";
         return new $modelo;
     }
 
