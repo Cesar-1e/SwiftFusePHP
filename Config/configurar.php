@@ -93,11 +93,15 @@ function mantenimiento()
  * Verifica, que no tenga etiquetas HTML
  * Además, elimina los espacios de inicio y fin de la cadena de texto
  * En el caso, de que incumpla, se detendra la ejecución y produce error 400
+ * En el caso de que $stirng recbia ''|'null'|'NULL' => Este retornara un NULL
  * @param String $string Input HTML
  * @return String
  */
 function filterINPUT($string)
 {
+    if ($string == "" || strtolower($string) == "null") {
+        return null;
+    }
     if (preg_match("/^<|.<|>$|;/", $string) >= 1) {
         error(400);
     }
