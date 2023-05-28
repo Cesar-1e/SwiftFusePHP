@@ -19,16 +19,17 @@ function is_ssl($bool)
     define("DESARROLLO", RUTA_URL . "Error/desarrollo");
     define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
-//Versión del framework
-define("VERSION_FRAMEWORK", "0.1");
+//Versión del SwiftFusePHP
+define("VERSION_SWIFTFUSEPHP", "0.7");
 
 /**
- * Redirecciona a la vista con su código de error
+ * Redirecciona a la vista con su código de estado
  * y finaliza la ejecución
- * @param  Int $code Código de error; Ejemplo: 404
+ * @param  Int $code Code Status; Ejemplo: 404
+ * @param  Boolean $isRedirect true => Redirecciona a la vista, false => Imprime la vista
  * @return void
  */
-function error($code)
+function error($code, $isRedirect = true)
 {
     $auxUrl = ERROR404;
     switch ($code) {
@@ -41,8 +42,23 @@ function error($code)
         case 403:
             $auxUrl = ERROR403;
             break;
+        case 503:
+            $auxUrl = MANTENIMIENTO;
+            break;
+        case 501:
+            $auxUrl = DESARROLLO;
+            break;
+        default:
+            $auxUrl = ERROR404;
+            break;
     }
-    die(header("location: " . $auxUrl));
+    setStatusCode($code);
+    if ($isRedirect) {
+        header("location: " . $auxUrl);
+    } else {
+        require_once RUTA_APP . "Vista/error/{$code}_View.php";
+    }
+    die();
 }
 
 /**
@@ -50,10 +66,13 @@ function error($code)
  * se esta en desarrollo
  * y finaliza la ejecución
  * @return void
+ * @deprecated
  */
 function desarrollo()
 {
+    handler(E_DEPRECATED, "Deprecated function " . debug_backtrace()[0]['function'], __FILE__, __LINE__);
     die(header("location: " . DESARROLLO));
+    
 }
 
 /**
@@ -61,9 +80,11 @@ function desarrollo()
  * se esta en mantenimiento
  * y finaliza la ejecución
  * @return void
+ * @deprecated
  */
 function mantenimiento()
 {
+    handler(E_DEPRECATED, "Deprecated function " . debug_backtrace()[0]['function'], __FILE__, __LINE__);
     die(header("location: " . DESARROLLO));
 }
 
@@ -78,7 +99,7 @@ function mantenimiento()
 function filterINPUT($string)
 {
     if (preg_match("/^<|.<|>$|;/", $string) >= 1) {
-        die(header("location: " . ERROR400));
+        error(400);
     }
     return trim($string);
 }
@@ -295,4 +316,84 @@ function getDateInSpanish($date = 'now')
 function nullToZero($value)
 {
     return ($value == null ? 0 : $value);
+}
+
+
+/**
+ * Establece el status en el header
+ *
+ * @param  Int $code Código del estado
+ * @return void
+ */
+function setStatusCode($code){
+    $statusCodes = array(
+        100 => "Continue",
+        101 => "Switching Protocols",
+        102 => "Processing",
+        103 => "Early Hints",
+        200 => "OK",
+        201 => "Created",
+        202 => "Accepted",
+        203 => "Non-Authoritative Information",
+        204 => "No Content",
+        205 => "Reset Content",
+        206 => "Partial Content",
+        207 => "Multi-Status",
+        208 => "Already Reported",
+        226 => "IM Used",
+        300 => "Multiple Choices",
+        301 => "Moved Permanently",
+        302 => "Found",
+        303 => "See Other",
+        304 => "Not Modified",
+        305 => "Use Proxy",
+        307 => "Temporary Redirect",
+        308 => "Permanent Redirect",
+        400 => "Bad Request",
+        401 => "Unauthorized",
+        402 => "Payment Required",
+        403 => "Forbidden",
+        404 => "Not Found",
+        405 => "Method Not Allowed",
+        406 => "Not Acceptable",
+        407 => "Proxy Authentication Required",
+        408 => "Request Timeout",
+        409 => "Conflict",
+        410 => "Gone",
+        411 => "Length Required",
+        412 => "Precondition Failed",
+        413 => "Payload Too Large",
+        414 => "URI Too Long",
+        415 => "Unsupported Media Type",
+        416 => "Range Not Satisfiable",
+        417 => "Expectation Failed",
+        418 => "I'm a teapot",
+        421 => "Misdirected Request",
+        422 => "Unprocessable Entity",
+        423 => "Locked",
+        424 => "Failed Dependency",
+        425 => "Too Early",
+        426 => "Upgrade Required",
+        428 => "Precondition Required",
+        429 => "Too Many Requests",
+        431 => "Request Header Fields Too Large",
+        451 => "Unavailable For Legal Reasons",
+        500 => "Internal Server Error",
+        501 => "Not Implemented",
+        502 => "Bad Gateway",
+        503 => "Service Unavailable",
+        504 => "Gateway Timeout",
+        505 => "HTTP Version Not Supported",
+        506 => "Variant Also Negotiates",
+        507 => "Insufficient Storage",
+        508 => "Loop Detected",
+        510 => "Not Extended",
+        511 => "Network Authentication Required"
+    );
+    if (isset($statusCodes[$code])) {
+        $statusText = $statusCodes[$code];
+        header("HTTP/1.1 $code $statusText");
+    }else{
+        handler(E_ERROR, "List status codes returned an unknown status code: {$code}", __FILE__, __LINE__);
+    }
 }
