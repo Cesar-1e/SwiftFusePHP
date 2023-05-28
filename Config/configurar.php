@@ -72,7 +72,6 @@ function desarrollo()
 {
     handler(E_DEPRECATED, "Deprecated function " . debug_backtrace()[0]['function'], __FILE__, __LINE__);
     die(header("location: " . DESARROLLO));
-    
 }
 
 /**
@@ -135,7 +134,7 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
                 $nombreImagen = rand(1, 100) * rand(1, 100) . "_thumb." . $tipoImagen[1];
             } while (file_exists($destino . $nombreImagen));
         } else {
-            $nombreImagen = explode(".", $nameImg)[0] . "." . $tipoImagen[1];
+            $nombreImagen = $nameImg;
         }
         //Parámetros optimización, resolución máxima permitida
         $max_ancho = 1280;
@@ -190,15 +189,23 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
         }
     };
 
+    mkdirs($relativePath);
+
     $withName = function ($key) use ($nameImgs) {
         return (key_exists($key, $nameImgs) ? $nameImgs[$key] : null);
     };
     //Validamos si en un array de files
     if (is_array($imgs["name"])) {
         for ($i = 0; $i < count($imgs['name']); $i++) {
+            if ($imgs["error"][$i] != 0) {
+                return false;
+            }
             $save($imgs["tmp_name"][$i], $imgs["type"][$i], $imgs["size"][$i], $withName($i));
         }
     } else {
+        if ($imgs["error"] != 0) {
+            return false;
+        }
         $save($imgs["tmp_name"], $imgs["type"], $imgs["size"], $withName(0));
     }
 
@@ -208,32 +215,59 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
 /**
  * Guarda el archivo al recibirla con $_FILES
  *
- * @param  mixed $file
- * @param  mixed $relativePath
- * @param  mixed $name
- * @return void
+ * @param  array $files $_FILES
+ * @param  string $relativePath Ruta relativa
+ * @param  array $nameFiles Nombres del archivo; Por defecto el lo agrega de manera aleatoria sin sobreescribir un archivo existente. Si agregas un nombre y existe, sobrescribira ese archivo
+ * @return array|false Retorna los nombres de los archivos, en el caso que falle retorna false
  */
-function saveFile($file, $relativePath, $name = null)
+function saveFile($files, $relativePath, $nameFiles = array())
 {
-    //Recibimos los atributos
-    $tmp = $file['tmp_name'];
-    $tipo = explode("/", $file['type']);
+    $nombreArchivos = array();
+    $save = function ($tmp_name, $type, $size, $nameFile) use ($relativePath, &$nombreArchivos) {
+        //Recibimos los atributos
+        $tmp = $tmp_name;
+        $tipo = explode("/", $type);
 
-    //Ruta de la carpeta donde se almacena la imagen
-    $destino = RUTA_APP . $relativePath;
+        //Ruta de la carpeta donde se almacena la imagen
+        $destino = RUTA_APP . $relativePath . "/";
 
-    //Establecemos el nombre de la imagen
-    if ($name == null) {
-        do {
-            $nombre = rand(1, 100) * rand(1, 100) . "." . $tipo[1];
-        } while (file_exists($destino . $nombre));
+        //Establecemos el nombre de la imagen
+        if ($nameFile == null) {
+            do {
+                $nombre = rand(1, 100) * rand(1, 100) . "." . $tipo[1];
+            } while (file_exists($destino . $nombre));
+        } else {
+            $nombre = $nameFile;
+        }
+        if (!move_uploaded_file($tmp, $destino . $nombre)) {
+            return false;
+        }else{
+            if (str_contains($nombre, ".pdf")) {
+                exec(RUTA_APP . "Archivos/scripts/compress_pdf.sh '" . RUTA_APP . "' '" . $destino . $nombre . "'");
+            }
+        }
+        $nombreArchivos[] = $nameFile;
+    };
+
+    mkdirs($relativePath);
+
+    $withName = function ($key) use ($nameFiles) {
+        return (key_exists($key, $nameFiles) ? $nameFiles[$key] : null);
+    };
+    //Validamos si en un array de files
+    if (is_array($files["name"])) {
+        for ($i = 0; $i < count($files['name']); $i++) {
+            if ($files["error"][$i] != 0) {
+                return false;
+            }
+            $save($files["tmp_name"][$i], $files["type"][$i], $files["size"][$i], $withName($i));
+        }
     } else {
-        $nombre = explode(".", $name)[0] . "." . $tipo[1];
+        if ($files["error"] != 0) {
+            return false;
+        }
+        $save($files["tmp_name"], $files["type"], $files["size"], $withName(0));
     }
-    if (!move_uploaded_file($tmp, $destino . $nombre)) {
-        return false;
-    }
-    return $nombre;
 }
 
 /**
@@ -329,7 +363,8 @@ function nullToZero($value)
  * @param  Int $code Código del estado
  * @return void
  */
-function setStatusCode($code){
+function setStatusCode($code)
+{
     $statusCodes = array(
         100 => "Continue",
         101 => "Switching Protocols",
@@ -397,7 +432,23 @@ function setStatusCode($code){
     if (isset($statusCodes[$code])) {
         $statusText = $statusCodes[$code];
         header("HTTP/1.1 $code $statusText");
-    }else{
+    } else {
         handler(E_ERROR, "List status codes returned an unknown status code: {$code}", __FILE__, __LINE__);
+    }
+}
+
+/**
+ * Creación de directorios y subdirectorios
+ *
+ * @param  mixed $relativePath Ruta relativa
+ * @return void
+ */
+function mkdirs($relativePath)
+{
+    $folders = explode("/", $relativePath);
+    $path = RUTA_APP;
+    foreach ($folders as $folder) {
+        $path .= "/" . $folder;
+        if (!is_dir($path)) mkdir($path);
     }
 }

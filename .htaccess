@@ -1,7 +1,7 @@
 #Denegar acceso directorios sin index
 Options -Indexes
 # Denegar acceso a los siguientes archivos
-<FilesMatch "\.(htaccess|sql|git)$">
+<FilesMatch "\.(htaccess|sql|git|gitignore|sh)$">
 Order Allow,Deny
 Deny from all
 </FilesMatch>

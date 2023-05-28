@@ -1,4 +1,5 @@
 Errores/error.log
 Archivos/*
 !Archivos/.htaccess
+!Archivos/scripts
 .vscode
