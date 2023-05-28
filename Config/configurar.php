@@ -1,32 +1,65 @@
 <?php
-//Ruta app
+/**
+ * Ruta de la aplicación.
+ * 
+ * Esta constante define la ruta absoluta de la aplicación.
+ * 
+ * @var string RUTA_APP
+ */
 define("RUTA_APP", dirname(dirname(__FILE__)) . "/");
+
+/**
+ * Configura la configuración de SSL y define las rutas URL del sitio.
+ *
+ * Esta función toma un parámetro booleano para indicar si se utiliza SSL (HTTPS) o no.
+ * Configura la constante IS_SSL con el valor proporcionado y define las rutas URL del sitio
+ * basadas en el protocolo HTTP o HTTPS según el valor de IS_SSL.
+ *
+ * @param bool $bool Indica si se utiliza SSL (HTTPS) o no.
+ * @return void
+ */
 function is_ssl($bool)
 {
     define("IS_SSL", $bool);
-    //Ruta url
+    
+    // Ruta URL
     $http = "http" . (IS_SSL ? "s" : "");
-    $aux =  $http . "://" . $_SERVER['SERVER_NAME'];
-    if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) { //Puerto personalizado
+    $aux = $http . "://" . $_SERVER['SERVER_NAME'];
+    
+    if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) {
+        // Puerto personalizado
         $aux .= ":" . $_SERVER["SERVER_PORT"];
     }
+    
     $aux .= "/" . LOCALDIR;
     define("RUTA_URL", $aux);
-    //Errores del sitio
+    
+    // Errores del sitio
     define("ERROR404", RUTA_URL . "Error/404");
     define("ERROR403", RUTA_URL . "Error/403");
     define("ERROR400", RUTA_URL . "Error/400");
     define("DESARROLLO", RUTA_URL . "Error/desarrollo");
     define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
-//Versión del SwiftFusePHP
+
+/**
+ * Versión del SwiftFusePHP.
+ *
+ * Esta constante define la versión actual del SwiftFusePHP.
+ *
+ * @var string
+ */
 define("VERSION_SWIFTFUSEPHP", "0.7");
 
 /**
- * Redirecciona a la vista con su código de estado
- * y finaliza la ejecución
- * @param  Int $code Code Status; Ejemplo: 404
- * @param  Boolean $isRedirect true => Redirecciona a la vista, false => Imprime la vista
+ * Redirecciona a la vista con su código de estado y finaliza la ejecución.
+ *
+ * Esta función redirecciona al usuario a una vista específica según el código de estado proporcionado.
+ * Si el parámetro $isRedirect es true, se realiza una redirección HTTP a la vista correspondiente.
+ * Si $isRedirect es false, se imprime directamente la vista en el navegador.
+ *
+ * @param int $code Código de estado (ejemplo: 404)
+ * @param bool $isRedirect Indica si se realiza una redirección o se imprime la vista directamente
  * @return void
  */
 function error($code, $isRedirect = true)
@@ -88,13 +121,16 @@ function mantenimiento()
 }
 
 /**
- * Filtra los datos de entrada
- * Verifica, que no tenga etiquetas HTML
- * Además, elimina los espacios de inicio y fin de la cadena de texto
- * En el caso, de que incumpla, se detendra la ejecución y produce error 400
- * En el caso de que $stirng recbia ''|'null'|'NULL' => Este retornara un NULL
- * @param String $string Input HTML
- * @return String
+ * Filtra los datos de entrada y verifica que no contengan etiquetas HTML.
+ *
+ * Esta función recibe una cadena de texto como entrada y realiza las siguientes operaciones:
+ * - Elimina los espacios de inicio y fin de la cadena de texto.
+ * - Verifica que la cadena de texto no contenga etiquetas HTML.
+ * - Si la cadena de texto es una cadena vacía (''), 'null' o 'NULL', retorna null.
+ * - Si la cadena de texto contiene etiquetas HTML, detiene la ejecución y produce un error 400.
+ *
+ * @param string $string Entrada de texto HTML
+ * @return string|null Cadena de texto filtrada o null si la entrada es vacía o igual a 'null' o 'NULL'
  */
 function filterINPUT($string)
 {
@@ -108,13 +144,23 @@ function filterINPUT($string)
 }
 
 /**
- * Guarda la imagen al recibirla mediante $_FILES
- * Si sus dimensiones son mayores de 1280p y el peso es mayor de 100kb, se reduce su peso sin afectar la calidad
+ * Guarda la imagen recibida a través de $_FILES y realiza compresión si es necesario.
  *
- * @param  array $imgs $_FILES
- * @param  string $relativePath Ruta relativa
- * @param  array $nameImgs Nombres del archivo; Por defecto el lo agrega de manera aleatoria sin sobreescribir un archivo existente. Si agregas un nombre y existe, sobrescribira ese archivo
- * @return array | false Retorna los nombres de los archivos, en el caso que falle retorna false
+ * Esta función recibe los siguientes parámetros:
+ * - $imgs: Un arreglo $_FILES que contiene la información de la imagen a guardar.
+ * - $relativePath: La ruta relativa donde se almacenará la imagen.
+ * - $nameImgs (opcional): Un arreglo de nombres de archivo personalizados. Por defecto, se generan nombres aleatorios.
+ *
+ * La función realiza las siguientes operaciones:
+ * - Verifica las dimensiones y el peso de la imagen.
+ * - Si las dimensiones son mayores de 1280p y el peso es mayor de 100kb, se reduce el peso de la imagen sin afectar la calidad.
+ * - Almacena la imagen en la carpeta especificada en $relativePath.
+ * - Retorna un arreglo con los nombres de los archivos guardados. En caso de fallo, retorna false.
+ *
+ * @param array $imgs Arreglo $_FILES con la información de la imagen.
+ * @param string $relativePath Ruta relativa donde se almacenará la imagen.
+ * @param array $nameImgs (opcional) Nombres de archivo personalizados.
+ * @return array|false Nombres de los archivos guardados o false en caso de fallo.
  */
 function saveImg($imgs, $relativePath, $nameImgs = array())
 {
@@ -213,12 +259,22 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
 }
 
 /**
- * Guarda el archivo al recibirla con $_FILES
+ * Guarda el archivo recibido a través de $_FILES.
  *
- * @param  array $files $_FILES
- * @param  string $relativePath Ruta relativa
- * @param  array $nameFiles Nombres del archivo; Por defecto el lo agrega de manera aleatoria sin sobreescribir un archivo existente. Si agregas un nombre y existe, sobrescribira ese archivo
- * @return array|false Retorna los nombres de los archivos, en el caso que falle retorna false
+ * Esta función recibe los siguientes parámetros:
+ * - $files: Un arreglo $_FILES que contiene la información del archivo a guardar.
+ * - $relativePath: La ruta relativa donde se almacenará el archivo.
+ * - $nameFiles (opcional): Un arreglo de nombres de archivo personalizados. Por defecto, se generan nombres aleatorios.
+ *
+ * La función realiza las siguientes operaciones:
+ * - Almacena el archivo en la carpeta especificada en $relativePath.
+ * - En caso de archivos PDF, se realiza una compresión utilizando un script externo.
+ * - Retorna un arreglo con los nombres de los archivos guardados. En caso de fallo, retorna false.
+ *
+ * @param array $files Arreglo $_FILES con la información del archivo.
+ * @param string $relativePath Ruta relativa donde se almacenará el archivo.
+ * @param array $nameFiles (opcional) Nombres de archivo personalizados.
+ * @return array|false Nombres de los archivos guardados o false en caso de fallo.
  */
 function saveFile($files, $relativePath, $nameFiles = array())
 {
@@ -271,8 +327,16 @@ function saveFile($files, $relativePath, $nameFiles = array())
 }
 
 /**
- * Suspende el acceso a la plataforma cuando
- * @var bool $isForced true no exista la $_SESSION['User']; false suspende el acceso total
+ * Suspende el acceso a la plataforma.
+ *
+ * Esta función suspende el acceso a la plataforma en función de los parámetros proporcionados:
+ * - $isForced: Un valor booleano que indica si la suspensión es forzada o no. Si es true y no existe la variable $_SESSION['User'], se suspende el acceso total. Si es false, se suspende el acceso independientemente de la existencia de $_SESSION['User'].
+ *
+ * La función realiza las siguientes operaciones:
+ * - Si $isForced es true y no existe $_SESSION['User'], se establece $_SESSION['suspend'] en true y se genera un error 503 (Servicio no disponible).
+ * - Si $isForced es false, se establece $_SESSION['suspend'] en true o se elimina si ya existe.
+ *
+ * @param bool $isForced Indica si la suspensión es forzada o no.
  * @return void
  */
 function suspend($isForced = true)
@@ -296,12 +360,16 @@ function suspend($isForced = true)
 
 
 /**
- * Valida el token de recaptcha v3 de Google
- * 
- * Los valores son obtenidos mediante $_POST -> token, action
+ * Valida el token de reCAPTCHA v3 de Google.
  *
- * @param  string $typeAction Tipo de la acción
- * @return bool Si es mayor el score 0.5 y es el mismo tipo de acción return true, en el caso contrario false
+ * Esta función valida el token de reCAPTCHA v3 proporcionado mediante $_POST. Los valores esperados son:
+ * - token: El token de reCAPTCHA v3.
+ * - action: El tipo de acción asociada al token.
+ *
+ * La función realiza una solicitud a la API de reCAPTCHA para verificar el token y compara los resultados con los parámetros proporcionados. Devuelve true si el puntaje (score) es mayor que 0.5 y la acción es la misma que la proporcionada. Devuelve false en caso contrario.
+ *
+ * @param string $typeAction Tipo de acción asociada al token.
+ * @return bool Retorna true si el token es válido y la acción coincide, false en caso contrario.
  */
 function validarToken($typeAction)
 {
@@ -328,10 +396,12 @@ function validarToken($typeAction)
 }
 
 /**
- * Obtener la fecha en español
+ * Obtener la fecha en español.
  *
- * @param  string $date default 'now'
- * @return string fecha en español
+ * Esta función devuelve la fecha formateada en español. El parámetro opcional $date especifica la fecha que se desea formatear. Si no se proporciona, se utiliza la fecha actual.
+ *
+ * @param string $date Fecha a formatear. Por defecto es 'now' (fecha actual).
+ * @return string La fecha formateada en español.
  */
 function getDateInSpanish($date = 'now')
 {
@@ -346,10 +416,12 @@ function getDateInSpanish($date = 'now')
 }
 
 /**
- * Si es null lo convierte en 0
+ * Si el valor es null, lo convierte en 0.
  *
- * @param  int $value
- * @return int
+ * Esta función toma un valor como argumento y verifica si es null. Si es así, devuelve 0; de lo contrario, devuelve el valor original.
+ *
+ * @param int $value El valor a verificar.
+ * @return int El valor convertido en 0 si era null, de lo contrario, el valor original.
  */
 function nullToZero($value)
 {
@@ -358,9 +430,11 @@ function nullToZero($value)
 
 
 /**
- * Establece el status en el header
+ * Establece el estado en el encabezado HTTP.
  *
- * @param  Int $code Código del estado
+ * Esta función toma un código de estado como argumento y establece el encabezado HTTP correspondiente en función del código proporcionado.
+ *
+ * @param int $code El código de estado.
  * @return void
  */
 function setStatusCode($code)
@@ -438,9 +512,11 @@ function setStatusCode($code)
 }
 
 /**
- * Creación de directorios y subdirectorios
+ * Crea directorios y subdirectorios.
  *
- * @param  mixed $relativePath Ruta relativa
+ * Esta función toma una ruta relativa como argumento y crea los directorios y subdirectorios correspondientes en esa ruta.
+ *
+ * @param mixed $relativePath La ruta relativa.
  * @return void
  */
 function mkdirs($relativePath)
@@ -454,10 +530,12 @@ function mkdirs($relativePath)
 }
 
 /**
- * Obtiene el texto del mes
+ * Obtiene el nombre del mes en español.
  *
- * @param  Int $index El index del array month
- * @return String
+ * Esta función toma un índice como argumento y devuelve el nombre del mes correspondiente en español.
+ *
+ * @param int $index El índice del array de meses.
+ * @return string El nombre del mes en español.
  */
 function getMonthInSpanish($index)
 {
@@ -466,14 +544,13 @@ function getMonthInSpanish($index)
 }
 
 /**
- * Sí el string es diferente a NULL este le retorna el string agegandole comillas al inicio y el fin de la cadena
- * Si es NULL le retorna en texto la palabra null
- * Ejemplo: 
- * Hola mundo => 'Hola mundo'
- * NULL => 'null'
+ * Agrega comillas al inicio y al final de una cadena de texto.
  *
- * @param  String $string Cadena de texto
- * @return String
+ * Esta función toma una cadena de texto como argumento y agrega comillas simples al inicio y al final de la cadena.
+ * Si la cadena es NULL, devuelve la palabra "null" como texto.
+ *
+ * @param string $string La cadena de texto.
+ * @return string La cadena de texto con comillas al inicio y al final, o "null" si la cadena es NULL.
  */
 function stringWithQuotationMark($string)
 {
@@ -486,20 +563,24 @@ function stringWithQuotationMark($string)
 }
 
 /**
- * Retorna en formato de moneda
+ * Formatea un número como una cadena en formato de moneda.
  *
- * @param  Int $number
- * @return String
+ * Esta función toma un número entero como argumento y devuelve una cadena que representa el número en formato de moneda.
+ * La cadena incluye un símbolo de moneda (💲) seguido del número formateado con separadores de miles y punto decimal.
+ *
+ * @param int $number El número entero a formatear.
+ * @return string La cadena formateada en formato de moneda.
  */
 function formatCurrency($number) {
     return "💲 " . number_format($number, 0, ",", ".");
 }
 
 /**
- * Eliminar directorios recursivos
- * Si el directorio cuenta con archivos o subdirectorios, este tambien sera eliminado
+ * Elimina un directorio y sus contenidos de forma recursiva.
  *
- * @param  String $relativePath Ruta relativa
+ * Esta función toma una ruta relativa como argumento y elimina el directorio y todos sus archivos y subdirectorios de forma recursiva.
+ *
+ * @param string $relativePath La ruta relativa del directorio a eliminar.
  * @return void
  */
 function rmdir_r($relativePath)
@@ -521,9 +602,12 @@ function rmdir_r($relativePath)
 }
 
 /**
- * $_FILES => CURLFile
+ * Convierte los archivos recibidos en $_FILES a objetos CURLFile.
  *
- * @return Array
+ * Esta función recorre los archivos recibidos en $_FILES y los convierte a objetos CURLFile. 
+ * Los objetos CURLFile se utilizan para realizar transferencias de archivos con cURL.
+ *
+ * @return array Un arreglo de objetos CURLFile.
  */
 function filesToCURLFiles()
 {
