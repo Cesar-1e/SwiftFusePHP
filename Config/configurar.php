@@ -49,7 +49,7 @@ function is_ssl($bool)
  *
  * @var string
  */
-define("VERSION_SWIFTFUSEPHP", "0.7");
+define("VERSION_SWIFTFUSEPHP", "0.9");
 
 /**
  * Redirecciona a la vista con su código de estado y finaliza la ejecución.
