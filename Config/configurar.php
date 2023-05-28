@@ -519,3 +519,19 @@ function rmdir_r($relativePath)
     }
     rmdir($folder);
 }
+
+/**
+ * $_FILES => CURLFile
+ *
+ * @return Array
+ */
+function filesToCURLFiles()
+{
+    $files = array();
+    foreach ($_FILES as $key => $file) {
+        if ($file['tmp_name'] !== "") {
+            $files[$key] = new CURLFile($file['tmp_name'], $file['type'], $file['name']);
+        }
+    }
+    return $files;
+}
