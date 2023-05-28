@@ -280,7 +280,7 @@ function suspend($isForced = true)
     $suspend = function () {
         if (!key_exists("suspend", $_SESSION)) {
             $_SESSION["suspend"] = true;
-            mantenimiento();
+            error(503);
         } else {
             unset($_SESSION["suspend"]);
         }
@@ -451,4 +451,71 @@ function mkdirs($relativePath)
         $path .= "/" . $folder;
         if (!is_dir($path)) mkdir($path);
     }
+}
+
+/**
+ * Obtiene el texto del mes
+ *
+ * @param  Int $index El index del array month
+ * @return String
+ */
+function getMonthInSpanish($index)
+{
+    $months = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
+    return $months[$index];
+}
+
+/**
+ * Sí el string es diferente a NULL este le retorna el string agegandole comillas al inicio y el fin de la cadena
+ * Si es NULL le retorna en texto la palabra null
+ * Ejemplo: 
+ * Hola mundo => 'Hola mundo'
+ * NULL => 'null'
+ *
+ * @param  String $string Cadena de texto
+ * @return String
+ */
+function stringWithQuotationMark($string)
+{
+    if ($string != null) {
+        $string = "'{$string}'";
+    } else {
+        $string = "null";
+    }
+    return $string;
+}
+
+/**
+ * Retorna en formato de moneda
+ *
+ * @param  Int $number
+ * @return String
+ */
+function formatCurrency($number) {
+    return "💲 " . number_format($number, 0, ",", ".");
+}
+
+/**
+ * Eliminar directorios recursivos
+ * Si el directorio cuenta con archivos o subdirectorios, este tambien sera eliminado
+ *
+ * @param  String $relativePath Ruta relativa
+ * @return void
+ */
+function rmdir_r($relativePath)
+{
+    $folder = RUTA_APP . $relativePath;
+    $it = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
+    $files = new RecursiveIteratorIterator(
+        $it,
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($files as $file) {
+        if ($file->isDir()) {
+            rmdir($file->getRealPath());
+        } else {
+            unlink($file->getRealPath());
+        }
+    }
+    rmdir($folder);
 }
