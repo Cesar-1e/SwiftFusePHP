@@ -7,7 +7,7 @@ define("HOST", "localhost");
 define("USERNAME", "remoto");
 define("PASSWORD", "123456");
 define("DATABASE", "framework_test");
-define("LOCALDIR", "Framework_PHP/");
+define("LOCALDIR", "SwiftFusePHP/");
 
 define("LANG", "es");
 is_ssl(false);
@@ -21,7 +21,7 @@ define("LOGO", (""));
 define("LOGOSVG", (""));
 define("EMAIL", "");
 //Versión del sitio
-define("VERSION", "PreAlpha");
+define("VERSION", "0.1");
 //Aqui puedes agregar las configuraciones de la plataforma/proyecto
 //Ejemplo
 function getEstados()

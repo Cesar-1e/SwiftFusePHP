@@ -11,7 +11,7 @@ Deny from all
 Options -Multiviews
 #Rescritura amigable
 RewriteEngine On
-RewriteBase /Framework_PHP/
+RewriteBase /SwiftFusePHP/
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ)]+)$ index.php?url=$1 [QSA,L]
@@ -22,5 +22,5 @@ RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ)]+)$ index.php?url=$1 [QSA,L]
 #php_value max_execution_time 1000
 #php_value max_input_time 1000
 
-ErrorDocument 404 /Framework_PHP/Vista/error/404_View.php
-ErrorDocument 400 /Framework_PHP/Vista/error/400_View.php
+ErrorDocument 404 /SwiftFusePHP/Vista/error/404_View.php
+ErrorDocument 400 /SwiftFusePHP/Vista/error/400_View.php

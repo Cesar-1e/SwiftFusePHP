@@ -3,6 +3,5 @@ Toda documentación esta directamente en la codificación.
 
 ### Pendientes
 * Documentación en README.md
-* Nombre oficial del framework
 
-`Versión del framework: Beta`
+`Versión del framework: 0.1`
