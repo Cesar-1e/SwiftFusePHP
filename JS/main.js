@@ -260,3 +260,34 @@ function formatCurrency(number) {
       .toString()
   );
 }
+
+/**
+ * Descargar archivos
+ * @param {Blob|String} blob Objeto Blob o url del data
+ * @param {String} name Nombre del archivo
+ * @param {Function} [fun=() => {}] Se ejecuta la function despues ded finalizar la descarga
+*/
+function downloadElement(blob, name, fun = () => { }) {
+  if (typeof blob != "string") {
+      blob = window.URL.createObjectURL(blob);
+  }
+  let url = blob;
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  fun();
+}
+
+/**
+ * 
+ * @param {HTMLElement} element El scroll se redirecciona al element
+ */
+function scrollToElement(element) {
+  element.scrollIntoView({
+      behavior: 'smooth'
+  });
+}
+
