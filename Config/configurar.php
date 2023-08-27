@@ -224,6 +224,11 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
                 if ($tipoImagen[1] == 'jpeg') {
                     imagejpeg($lienzo, $destino . $nombreImagen);
                 } else if ($tipoImagen[1] == 'png') {
+                    imagesavealpha($original, true);
+                    imagealphablending($lienzo, false);
+                    imagesavealpha($lienzo, true);
+
+                    imagecopyresampled($lienzo, $original, 0, 0, 0, 0, $anchoFinal, $altoFinal, $ancho, $alto);
                     imagepng($lienzo, $destino . $nombreImagen);
                 } else if ($tipoImagen[1] == 'gif') {
                     imagegif($lienzo, $destino . $nombreImagen);
