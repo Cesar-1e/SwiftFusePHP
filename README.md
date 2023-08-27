@@ -4,4 +4,4 @@ Toda documentación esta directamente en la codificación.
 ### Pendientes
 * Documentación en README.md
 
-`Versión del framework: 0.1`
+`Versión del SwiftFusePHP: 0.9`
