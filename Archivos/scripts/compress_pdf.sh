@@ -7,7 +7,7 @@ readonly RUTA_APP="$1"
 input="$2"
 
 function log_error {
-    local message "$1"
+    local message="$1"
     "${RUTA_APP}Archivos/scripts/log.sh" "$RUTA_APP" "$message"
 }
 

@@ -224,11 +224,6 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
                 if ($tipoImagen[1] == 'jpeg') {
                     imagejpeg($lienzo, $destino . $nombreImagen);
                 } else if ($tipoImagen[1] == 'png') {
-                    imagesavealpha($original, true);
-                    imagealphablending($lienzo, false);
-                    imagesavealpha($lienzo, true);
-
-                    imagecopyresampled($lienzo, $original, 0, 0, 0, 0, $anchoFinal, $altoFinal, $ancho, $alto);
                     imagepng($lienzo, $destino . $nombreImagen);
                 } else if ($tipoImagen[1] == 'gif') {
                     imagegif($lienzo, $destino . $nombreImagen);
@@ -237,6 +232,7 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
             $nombreImagenes[] = $nombreImagen;
         } else {
             handler(E_ERROR, "Solo se pueden subir imagenes tipo jpeg, jpg, png y gif.", __FILE__, __LINE__);
+            $nombreImagenes = false;
         }
     };
 
@@ -295,19 +291,20 @@ function saveFile($files, $relativePath, $nameFiles = array())
         //Establecemos el nombre de la imagen
         if ($nameFile == null) {
             do {
-                $nombre = rand(1, 100) * rand(1, 100) . "." . $tipo[1];
+                $nombre = (rand(1, 999) * rand(1, 999)) . "." . $tipo[1];
             } while (file_exists($destino . $nombre));
         } else {
             $nombre = $nameFile;
         }
         if (!move_uploaded_file($tmp, $destino . $nombre)) {
-            return false;
-        }else{
-            if (str_contains($nombre, ".pdf")) {
-                exec(RUTA_APP . "Archivos/scripts/compress_pdf.sh '" . RUTA_APP . "' '" . $destino . $nombre . "'");
+            if (!rename($tmp, $destino . $nombre)) {
+                return false;
             }
         }
-        $nombreArchivos[] = $nameFile;
+        if (str_contains($nombre, ".pdf")) {
+            exec(RUTA_APP . "Archivos/scripts/compress_pdf.sh '" . RUTA_APP . "' '" . $destino . $nombre . "'");
+        }
+        $nombreArchivos[] = $nombre;
     };
 
     mkdirs($relativePath);
@@ -328,7 +325,11 @@ function saveFile($files, $relativePath, $nameFiles = array())
             return false;
         }
         $save($files["tmp_name"], $files["type"], $files["size"], $withName(0));
+        if (count($nombreArchivos) == 0) {
+            return false;
+        }
     }
+    return $nombreArchivos;
 }
 
 /**
@@ -529,7 +530,7 @@ function mkdirs($relativePath)
     $folders = explode("/", $relativePath);
     $path = RUTA_APP;
     foreach ($folders as $folder) {
-        $path .= "/" . $folder;
+        $path .=  $folder . "/";
         if (!is_dir($path)) mkdir($path);
     }
 }
@@ -559,7 +560,7 @@ function getMonthInSpanish($index)
  */
 function stringWithQuotationMark($string)
 {
-    if ($string != null) {
+    if ($string != null && $string != 'null') {
         $string = "'{$string}'";
     } else {
         $string = "null";
@@ -576,8 +577,9 @@ function stringWithQuotationMark($string)
  * @param int $number El número entero a formatear.
  * @return string La cadena formateada en formato de moneda.
  */
-function formatCurrency($number) {
-    return "💲 " . number_format($number, 0, ",", ".");
+function formatCurrency($number, $icon = "💲")
+{
+    return "{$icon} " . number_format($number, 0, ",", ".");
 }
 
 /**
