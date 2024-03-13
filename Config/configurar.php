@@ -95,32 +95,6 @@ function error($code, $isRedirect = true)
 }
 
 /**
- * Redirecciona a la vista con el aviso, de que
- * se esta en desarrollo
- * y finaliza la ejecución
- * @return void
- * @deprecated
- */
-function desarrollo()
-{
-    handler(E_DEPRECATED, "Deprecated function " . debug_backtrace()[0]['function'], __FILE__, __LINE__);
-    die(header("location: " . DESARROLLO));
-}
-
-/**
- * Redirecciona a la vista con el aviso, de que
- * se esta en mantenimiento
- * y finaliza la ejecución
- * @return void
- * @deprecated
- */
-function mantenimiento()
-{
-    handler(E_DEPRECATED, "Deprecated function " . debug_backtrace()[0]['function'], __FILE__, __LINE__);
-    die(header("location: " . DESARROLLO));
-}
-
-/**
  * Filtra los datos de entrada y verifica que no contengan etiquetas HTML.
  *
  * Esta función recibe una cadena de texto como entrada y realiza las siguientes operaciones:
