@@ -8,6 +8,7 @@ if (isset($argv)) {
     die();
 }
 require_once "Config/configurar.user.php";
+//suspend(false);
 require_once "Modelo/Conexion_Model.php";
 require_once "Libreria/Controlador.php";
 require_once "Libreria/Core.php";

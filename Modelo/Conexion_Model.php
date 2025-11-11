@@ -87,6 +87,7 @@ class Conexion
             }
         }
         $this->stmt->bindValue($parametro, $valor, $tipo);
+        $this->isExecuted = false;
     }
 
         
@@ -242,5 +243,10 @@ class Conexion
     public function rollBack()
     {
         $this->dbh->rollBack();
+    }
+
+    public function isTransaction()
+    {
+        return $this->dbh->inTransaction();
     }
 }

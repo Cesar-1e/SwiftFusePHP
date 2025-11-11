@@ -38,8 +38,8 @@ function is_ssl($bool)
     define("ERROR404", RUTA_URL . "Error/404");
     define("ERROR403", RUTA_URL . "Error/403");
     define("ERROR400", RUTA_URL . "Error/400");
-    define("DESARROLLO", RUTA_URL . "Error/desarrollo");
-    define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
+    define("DESARROLLO", RUTA_URL . "Error/501");
+    define("MANTENIMIENTO", RUTA_URL . "Error/503");
 }
 
 /**
@@ -108,7 +108,7 @@ function error($code, $isRedirect = true)
  */
 function filterINPUT($string)
 {
-    if ($string == "" || strtolower($string) == "null") {
+    if ($string == "" || mb_strtolower($string) == "null") {
         return null;
     }
     if (preg_match("/^<|.<|>$|;/", $string) >= 1) {
@@ -151,7 +151,7 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
         //Establecemos el nombre de la imagen
         if ($nameImg == null) {
             do {
-                $nombreImagen = rand(1, 100) * rand(1, 100) . "_thumb." . $tipoImagen[1];
+                $nombreImagen = random_int(1, 999) . date("YmdHis") . uniqid() . "_thumb." . $tipoImagen[1];
             } while (file_exists($destino . $nombreImagen));
         } else {
             $nombreImagen = $nameImg;
@@ -259,7 +259,7 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
 function saveFile($files, $relativePath, $nameFiles = array())
 {
     $nombreArchivos = array();
-    $save = function ($tmp_name, $type, $size, $nameFile) use ($relativePath, &$nombreArchivos) {
+    $save = function ($tmp_name, $type, $size, $nameFile, $extension) use ($relativePath, &$nombreArchivos) {
         //Recibimos los atributos
         $tmp = $tmp_name;
         $tipo = explode("/", $type);
@@ -270,7 +270,7 @@ function saveFile($files, $relativePath, $nameFiles = array())
         //Establecemos el nombre de la imagen
         if ($nameFile == null) {
             do {
-                $nombre = (rand(1, 999) * rand(1, 999)) . "." . $tipo[1];
+                $nombre = random_int(1, 999) . date("YmdHis") . uniqid() . "." . $extension;
             } while (file_exists($destino . $nombre));
         } else {
             $nombre = $nameFile;
@@ -297,13 +297,17 @@ function saveFile($files, $relativePath, $nameFiles = array())
             if ($files["error"][$i] != 0) {
                 return false;
             }
-            $save($files["tmp_name"][$i], $files["type"][$i], $files["size"][$i], $withName($i));
+            $extension = explode(".", $files["name"][$i]);
+            $extension = $extension[count($extension) - 1];
+            $save($files["tmp_name"][$i], $files["type"][$i], $files["size"][$i], $withName($i), $extension);
         }
     } else {
         if ($files["error"] != 0) {
             return false;
         }
-        $save($files["tmp_name"], $files["type"], $files["size"], $withName(0));
+        $extension = explode(".", $files["name"]);
+        $extension = $extension[count($extension) - 1];
+        $save($files["tmp_name"], $files["type"], $files["size"], $withName(0), $extension);
         if (count($nombreArchivos) == 0) {
             return false;
         }
@@ -540,7 +544,7 @@ function getMonthInSpanish($index)
 function stringWithQuotationMark($string)
 {
     if ($string != null && $string != 'null') {
-        $string = "'{$string}'";
+        $string = "'" . addslashes($string) . "'";
     } else {
         $string = "null";
     }
@@ -572,6 +576,10 @@ function formatCurrency($number, $icon = "💲")
 function rmdir_r($relativePath)
 {
     $folder = RUTA_APP . $relativePath;
+    if(!is_dir($folder)){
+        handler(E_ERROR, "The folder {$folder} does not exist.", __FILE__, __LINE__);
+        return;
+    }
     $it = new RecursiveDirectoryIterator($folder, RecursiveDirectoryIterator::SKIP_DOTS);
     $files = new RecursiveIteratorIterator(
         $it,
@@ -604,4 +612,17 @@ function filesToCURLFiles()
         }
     }
     return $files;
+}
+
+/**
+ * Verifica si el texto es una dirección de correo electrónico válida.
+ *
+ * @param string $text - Texto que se verificará si es un email.
+ * @return bool - Devuelve `true` si el texto es un email válido, de lo contrario, devuelve `false`.
+ */
+function isEmail($text): bool
+{
+    if ($text == null) return false;
+    $mailformat = '/^[a-zA-Z0-9ñÑ]([a-zA-Z0-9._+-ñÑ]*[a-zA-Z0-9ñÑ])?@[a-zA-Z0-9ñÑ]([a-zA-Z0-9.\-ñÑ]*[a-zA-Z0-9ñÑ])?\.[a-zA-Z]{2,}$/';
+    return preg_match($mailformat, $text) === 1;
 }

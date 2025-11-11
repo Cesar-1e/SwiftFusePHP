@@ -207,7 +207,7 @@ function isEmail(text) {
  * @param {string|int|null} [value=null] - El valor del option. Valor predeterminado es null.
  * @returns {boolean} - Devuelve true si la opción se agregó correctamente, de lo contrario, devuelve false.
  */
-function addOption(select, text, value = null) {
+function addOption(select, text, value = null, dataSet = []) {
   let option = new Option(text.trim(), value);
 
   // Comprobamos que los valores no se repitan
@@ -221,7 +221,8 @@ function addOption(select, text, value = null) {
       return false;
     }
   }
-
+  //Agregamos los dataset
+  dataSet.forEach(set => option.dataset[set.name] = set.value);
   select.add(option);
   return true;
 }
@@ -247,6 +248,9 @@ function divertEnterSubmit(element, btn) {
  * @param {HTMLSelectElement} select - Elemento select al cual se eliminarán las opciones.
  */
 function resetSelect(select) {
+  if (typeof select.options == "undefined") {
+    return;
+  }
   let option = select.options[0];
   select.innerHTML = "";
   select.add(option);
