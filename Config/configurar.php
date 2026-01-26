@@ -15,31 +15,52 @@ define("RUTA_APP", dirname(dirname(__FILE__)) . "/");
  * Configura la constante IS_SSL con el valor proporcionado y define las rutas URL del sitio
  * basadas en el protocolo HTTP o HTTPS según el valor de IS_SSL.
  *
- * @param bool $bool Indica si se utiliza SSL (HTTPS) o no.
+ * @param bool $forceSSL Indica si se utiliza SSL (HTTPS) o no.
  * @return void
  */
-function is_ssl($bool)
+function is_ssl($forceSSL)
 {
-    define("IS_SSL", $bool);
-    
-    // Ruta URL
-    $http = "http" . (IS_SSL ? "s" : "");
-    $aux = $http . "://" . $_SERVER['SERVER_NAME'];
-    
-    if (!($_SERVER["SERVER_PORT"] == 80 || $_SERVER["SERVER_PORT"] == 443)) {
-        // Puerto personalizado
-        $aux .= ":" . $_SERVER["SERVER_PORT"];
+    // Detectar protocolo
+    if ($forceSSL === true) {
+        $protocol = "https";
+    } elseif ($forceSSL === false) {
+        $protocol = "http";
+    } else {
+        // Autodetección segura
+        $isHttps =
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
+            (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ||
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+        $protocol = $isHttps ? "https" : "http";
     }
-    
-    $aux .= "/" . LOCALDIR;
-    define("RUTA_URL", $aux);
-    
-    // Errores del sitio
+
+    define("IS_SSL", $protocol === "https");
+
+    // Host confiable
+    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+
+    // Separar host y puerto si vienen juntos
+    if (strpos($host, ':') !== false) {
+        list($hostOnly) = explode(':', $host, 2);
+    } else {
+        $hostOnly = $host;
+    }
+
+    // Construir URL base
+    $url = $protocol . "://" . $hostOnly;
+
+    // Agregar directorio base
+    $url .= "/" . LOCALDIR;
+
+    define("RUTA_URL", $url);
+
+    // Rutas de error
     define("ERROR404", RUTA_URL . "Error/404");
     define("ERROR403", RUTA_URL . "Error/403");
     define("ERROR400", RUTA_URL . "Error/400");
-    define("DESARROLLO", RUTA_URL . "Error/501");
-    define("MANTENIMIENTO", RUTA_URL . "Error/503");
+    define("DESARROLLO", RUTA_URL . "Error/desarrollo");
+    define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
 
 /**

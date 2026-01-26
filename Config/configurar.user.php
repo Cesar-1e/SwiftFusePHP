@@ -8,6 +8,7 @@ define("USERNAME", "remoto");
 define("PASSWORD", "123456");
 define("DATABASE", "framework_test");
 define("LOCALDIR", "SwiftFusePHP/");
+define("SSL_CA", "");
 
 define("LANG", "es");
 is_ssl(false);

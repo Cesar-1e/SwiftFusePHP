@@ -1,6 +1,6 @@
 <?php
 /**
- * Clase encarga en realizar la conexión mediante PDO a mysql
+ * Clase encargada de realizar la conexión mediante PDO a MySQL
  */
 class Conexion
 {
@@ -8,49 +8,51 @@ class Conexion
     private $usuario = USERNAME;
     private $password = PASSWORD;
     private $database = DATABASE;
+    private $ssl_ca = SSL_CA;
     private $dbh;
     private $stmt;
     private $error = null;
     private $isExecuted = false;
-    
+
     /**
-     * Configura la conexiín y crea una instancia de PDO
-     * 
-     * En el caso de que falle la conexión, almacena el error en $error
+     * Configura la conexión y crea una instancia de PDO
      *
-     * @return void
+     * En el caso de que falle la conexión, almacena el error en $error
      */
     public function __construct()
     {
-        //Configurar conexion
-        $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->database;
-        $opciones = array(
+        // Configurar conexión
+        $dsn = "mysql:host={$this->host};dbname={$this->database};charset=utf8mb4";
+        $opciones = [
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        );
-        //Crear una instancia de PDO
+        ];
+        if ($this->ssl_ca) {
+            $opciones[PDO::MYSQL_ATTR_SSL_CA] = $this->ssl_ca;
+        }
+
+        // Crear una instancia de PDO
         try {
             $this->dbh = new PDO($dsn, $this->usuario, $this->password, $opciones);
-            $this->dbh->exec("set names utf8");
         } catch (PDOException $ex) {
             $this->error = $ex->getMessage();
         }
     }
-    
+
     /**
      * Obtiene el error que se ha presentado
      *
-     * @return void
+     * @return string|null
      */
     public function getError()
     {
         return $this->error;
     }
-    
+
     /**
-     * Preparamos la consulta
+     * Prepara la consulta
      *
-     * @param  string $sql
+     * @param string $sql
      * @return void
      */
     public function query($sql)
@@ -59,13 +61,12 @@ class Conexion
         $this->isExecuted = false;
     }
 
-        
     /**
-     * Vincula la consulta con bind
+     * Vincula parámetros a la consulta preparada
      *
-     * @param  string $parametro El parametro de la consulta; Example :nombre
-     * @param  mixed $valor El valor a establecer; Example: Pepito
-     * @param  string $tipo (1)PDO::PARAM_INT | (5)PDO::PARAM_BOOL | (0)PDO::PARAM_NULL | (2)PDO::PARAM_STR
+     * @param string $parametro El parámetro de la consulta; Ejemplo: :nombre
+     * @param mixed $valor El valor a establecer; Ejemplo: Pepito
+     * @param int|null $tipo Tipo de dato (PDO::PARAM_*). Si no se especifica, se detecta automáticamente.
      * @return void
      */
     public function bind($parametro, $valor, $tipo = null)
@@ -81,20 +82,22 @@ class Conexion
                 case is_null($valor):
                     $tipo = PDO::PARAM_NULL;
                     break;
+                case is_array($valor):
+                    $tipo = PDO::PARAM_STR;
+                    $valor = json_encode($valor, JSON_UNESCAPED_UNICODE);
+                    break;
                 default:
                     $tipo = PDO::PARAM_STR;
                     break;
             }
         }
         $this->stmt->bindValue($parametro, $valor, $tipo);
-        $this->isExecuted = false;
     }
 
-        
     /**
-     * Ejecuta la consulta
+     * Ejecuta la consulta preparada
      *
-     * @return bool true -> Ejecución exitosa, false -> Se presento un erro y se almaceno en $error
+     * @return bool true si la ejecución fue exitosa, false si ocurrió un error
      */
     public function execute()
     {
@@ -102,13 +105,17 @@ class Conexion
             return ($this->isExecuted ?: $this->isExecuted = $this->stmt->execute());
         } catch (PDOException $ex) {
             $this->error = $ex->getMessage();
-            return false;
+            if($this->isTransactionActive()){
+                throw $ex;
+            }else{
+                 return false;
+            }
         }
     }
-    
+
     /**
      * Comprueba si estamos conectados al motor
-     * 
+     *
      * En el caso de no estar conectados, se conecta al motor
      *
      * @return void
@@ -123,11 +130,10 @@ class Conexion
         }
     }
 
-        
     /**
-     * Obtiene los objetos
+     * Obtiene los objetos del resultado
      *
-     * @return array Object
+     * @return array
      */
     public function getObjects()
     {
@@ -135,11 +141,10 @@ class Conexion
         return $this->stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
-        
     /**
-     * Obtiene un solo objeto
+     * Obtiene un solo objeto del resultado
      *
-     * @return Object
+     * @return object|null
      */
     public function getObject()
     {
@@ -147,7 +152,17 @@ class Conexion
         return $this->stmt->fetch(PDO::FETCH_OBJ);
     }
 
-        
+    /**
+     * Obtiene un array indexado por los nombres de las columnas
+     *
+     * @return array
+     */
+    public function getArray()
+    {
+        $this->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     /**
      * Obtiene los array indexado por los nombres de las columnas del conjunto de resultados
      *
@@ -160,31 +175,7 @@ class Conexion
     }
 
     /**
-     * Obtiene el array indexado por los nombres de las columnas del conjunto de resultados
-     *
-     * @return array
-     */
-    public function getArray()
-    {
-        $this->execute();
-        return $this->stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-        
-    /**
-     * Devuelve un array no indexado por las columnas
-     *
-     * @return array
-     */
-    public function getArrayWithoutIndexByColumn()
-    {
-        $this->execute();
-        return $this->stmt->fetchAll(PDO::FETCH_NUM);
-    }
-
-    
-    /**
-     * Obtiene cantidad de filas
+     * Obtiene la cantidad de filas afectadas
      *
      * @return int
      */
@@ -194,9 +185,20 @@ class Conexion
         return $this->stmt->rowCount();
     }
 
-        
     /**
-     * Iniciar Transaccion
+     * Ejecutar Sentencia de Transacción
+     *
+     * @param  string $sql
+     * @return void
+     * @deprecated Usar executeTransaction en su lugar
+     */
+    public function exec($sql)
+    {
+        $this->dbh->exec($sql);
+    }
+
+    /**
+     * Inicia una transacción
      *
      * @return void
      */
@@ -205,19 +207,23 @@ class Conexion
         $this->dbh->beginTransaction();
     }
 
-        
     /**
-     * Ejecutar Sentencia de Transacción
+     * Ejecuta una consulta dentro de una transacción
      *
-     * @param  string $sql
-     * @return void
+     * @param string $sql
+     * @return bool true si la ejecución fue exitosa, false si ocurrió un error
      */
-    public function exec($sql)
+    public function executeTransaction($sql)
     {
-        $this->dbh->exec($sql);
+        try {
+            $this->query($sql);
+            return $this->execute();
+        } catch (PDOException $ex) {
+            $this->error = $ex->getMessage();
+            return false;
+        }
     }
 
-        
     /**
      * Confirma las ejecuciones de la transacción
      *
@@ -234,9 +240,8 @@ class Conexion
         }
     }
 
-        
     /**
-     * Deshacer todas las operaciones realizadas con la transacción
+     * Deshace todas las operaciones realizadas con la transacción
      *
      * @return void
      */
@@ -245,7 +250,7 @@ class Conexion
         $this->dbh->rollBack();
     }
 
-    public function isTransaction()
+    public function isTransactionActive()
     {
         return $this->dbh->inTransaction();
     }
