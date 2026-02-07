@@ -10,7 +10,11 @@
     <h1>Guardar archivos</h1>
     <h2>Imagenes</h2>
     <form action="javascript: saveImg();" method="post" enctype="multipart/form-data" id="frmImageUpload">
-        <input type="file" name="imageFile" accept="image/*" required>
+        <label>Un archivo de imagen</label>
+        <input type="file" name="imageFile" accept="image/*">
+        <br>
+        <label>Varios archivos de imagen</label>
+        <input type="file" name="imageFiles[]" accept="image/*" multiple>
         <br><br>
         <input type="submit" value="Subir Imagen">
     </form>
@@ -24,7 +28,7 @@
                     alert("Imagen guardada correctamente");
                     response.data.forEach(file => {
                         let imgElement = document.createElement("img");
-                        imgElement.src = file.ruta;
+                        imgElement.src = RUTA + "Public/Uploads/Images/" + file;
                         imgElement.width = 200;
                         document.getElementById("spanFilesImg").appendChild(imgElement);
                     });
