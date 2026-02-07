@@ -11,7 +11,7 @@ define("LOCALDIR", "SwiftFusePHP/");
 define("SSL_CA", "");
 
 define("LANG", "es");
-is_ssl(false);
+is_ssl(true);
 define("CLAVE_RECAPTCHA_V3", "");
 
 //Nombre del sitio
