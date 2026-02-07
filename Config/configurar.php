@@ -169,10 +169,41 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
         //Ruta de la carpeta donde se almacena la imagen
         $destino = RUTA_APP . $relativePath . "/";
 
-        //Establecemos el nombre de la imagen
+        // Detectar el tipo real de imagen usando getimagesize() en vez de confiar en el MIME type
+        $infoImagen = getimagesize($tmpImagen);
+        if ($infoImagen === false) {
+            handler(E_ERROR, "No se pudo detectar el tipo de imagen.", __FILE__, __LINE__);
+            $nombreImagenes = false;
+            return;
+        }
+
+        // Obtener la extensión real basada en el tipo IMAGETYPE_*
+        $tipoReal = $infoImagen[2];
+        $extensionReal = '';
+        
+        switch ($tipoReal) {
+            case IMAGETYPE_JPEG:
+                $extensionReal = 'jpg';
+                break;
+            case IMAGETYPE_PNG:
+                $extensionReal = 'png';
+                break;
+            case IMAGETYPE_GIF:
+                $extensionReal = 'gif';
+                break;
+            case IMAGETYPE_WEBP:
+                $extensionReal = 'webp';
+                break;
+            default:
+                handler(E_ERROR, "Tipo de imagen no soportado.", __FILE__, __LINE__);
+                $nombreImagenes = false;
+                return;
+        }
+
+        //Establecemos el nombre de la imagen con la extensión correcta
         if ($nameImg == null) {
             do {
-                $nombreImagen = random_int(1, 999) . date("YmdHis") . uniqid() . "_thumb." . $tipoImagen[1];
+                $nombreImagen = random_int(1, 999) . date("YmdHis") . uniqid() . "_thumb." . $extensionReal;
             } while (file_exists($destino . $nombreImagen));
         } else {
             $nombreImagen = $nameImg;
@@ -181,23 +212,24 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
         $max_ancho = 1280;
         $max_alto = 900;
         //Valida es tipo de archivo a subir, solo permite imagenes jpeg, jpg, png y gif
-        if ($tipoImagen[1] == "jpeg" || $tipoImagen[1] == "jpg" || $tipoImagen[1] == "png" || $tipoImagen[1] == "gif" || $tipoImagen[1] == "webp") {
+        if ($tipoReal == IMAGETYPE_JPEG || $tipoReal == IMAGETYPE_PNG || $tipoReal == IMAGETYPE_GIF || $tipoReal == IMAGETYPE_WEBP) {
             $medidasImagen = getimagesize($tmpImagen);
             if ($medidasImagen[0] < $max_ancho && $pesoImagen < 100000) {
                 move_uploaded_file($tmpImagen, $destino . $nombreImagen);
             } else {
                 $rutaOriginal = $tmpImagen;
-                if ($tipoImagen[1] == 'jpeg') {
+                if ($tipoReal == IMAGETYPE_JPEG) {
                     $original = imagecreatefromjpeg($rutaOriginal);
-                } else if ($tipoImagen[1] == 'png') {
+                } else if ($tipoReal == IMAGETYPE_PNG) {
                     $original = imagecreatefrompng($rutaOriginal);
-                } else if ($tipoImagen[1] == 'gif') {
+                } else if ($tipoReal == IMAGETYPE_GIF) {
                     $original = imagecreatefromgif($rutaOriginal);
+                } else if ($tipoReal == IMAGETYPE_WEBP) {
+                    $original = imagecreatefromwebp($rutaOriginal);
                 }
+                
                 $ancho = imagesx($original);
                 $alto = imagesy($original);
-
-                list($ancho, $alto) = getimagesize($rutaOriginal);
 
                 $x_ratio = $max_ancho / $ancho;
                 $y_ratio = $max_alto / $alto;
@@ -216,17 +248,19 @@ function saveImg($imgs, $relativePath, $nameImgs = array())
                 $lienzo = imagecreatetruecolor($anchoFinal, $altoFinal);
 
                 imagecopyresampled($lienzo, $original, 0, 0, 0, 0, $anchoFinal, $altoFinal, $ancho, $alto);
-                if ($tipoImagen[1] == 'jpeg') {
+                if ($tipoReal == IMAGETYPE_JPEG) {
                     imagejpeg($lienzo, $destino . $nombreImagen);
-                } else if ($tipoImagen[1] == 'png') {
+                } else if ($tipoReal == IMAGETYPE_PNG) {
                     imagesavealpha($original, true);
                     imagealphablending($lienzo, false);
                     imagesavealpha($lienzo, true);
 
                     imagecopyresampled($lienzo, $original, 0, 0, 0, 0, $anchoFinal, $altoFinal, $ancho, $alto);
                     imagepng($lienzo, $destino . $nombreImagen);
-                } else if ($tipoImagen[1] == 'gif') {
+                } else if ($tipoReal == IMAGETYPE_GIF) {
                     imagegif($lienzo, $destino . $nombreImagen);
+                } else if ($tipoReal == IMAGETYPE_WEBP) {
+                    imagewebp($lienzo, $destino . $nombreImagen);
                 }
             }
             $nombreImagenes[] = $nombreImagen;
