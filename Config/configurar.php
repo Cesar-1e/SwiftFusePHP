@@ -1,5 +1,14 @@
 <?php
 /**
+ * Versión del SwiftFusePHP.
+ *
+ * Esta constante define la versión actual del SwiftFusePHP.
+ *
+ * @var string
+ */
+define("VERSION_SWIFTFUSEPHP", "0.9.3");
+
+/**
  * Ruta de la aplicación.
  * 
  * Esta constante define la ruta absoluta de la aplicación.
@@ -62,15 +71,6 @@ function is_ssl($forceSSL)
     define("DESARROLLO", RUTA_URL . "Error/desarrollo");
     define("MANTENIMIENTO", RUTA_URL . "Error/mantenimiento");
 }
-
-/**
- * Versión del SwiftFusePHP.
- *
- * Esta constante define la versión actual del SwiftFusePHP.
- *
- * @var string
- */
-define("VERSION_SWIFTFUSEPHP", "0.9.3");
 
 /**
  * Redirecciona a la vista con su código de estado y finaliza la ejecución.

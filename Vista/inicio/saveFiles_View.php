@@ -3,7 +3,7 @@
 
 <head>
     <?php require_once RUTA_APP . "Includ/head.php"; ?>
-    <title><?php echo NOMBRESITIO; ?></title>
+    <title><?php echo SITE_NAME; ?></title>
 </head>
 
 <body>
@@ -28,7 +28,7 @@
                     alert("Imagen guardada correctamente");
                     response.data.forEach(file => {
                         let imgElement = document.createElement("img");
-                        imgElement.src = RUTA + "Public/Uploads/Images/" + file;
+                        imgElement.src = RUTA + "Storage/serve/Images/" + file;
                         imgElement.width = 200;
                         document.getElementById("spanFilesImg").appendChild(imgElement);
                     });

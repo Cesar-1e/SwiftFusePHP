@@ -4,3 +4,7 @@ Archivos/*
 !Archivos/scripts
 .vscode
 Public
+.env
+storage/*
+!storage/.htaccess
+!storage/.gitkeep

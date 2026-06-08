@@ -1,26 +1,42 @@
-#Denegar acceso directorios sin index
+# Deny directory browsing
 Options -Indexes
-# Denegar acceso a los siguientes archivos
-<FilesMatch "\.(htaccess|sql|git|gitignore|sh)$">
-Order Allow,Deny
-Deny from all
-</FilesMatch>
-#Archivo que no exista se redireccionara al index.php
-<IfModule mod_rewrite.c>
-#Desactivar multivistas
-Options -Multiviews
-#Rescritura amigable
-RewriteEngine On
-RewriteBase /SwiftFusePHP/
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ)]+)$ index.php?url=$1 [QSA,L]
-</IfModule>
-#Establece tamaño de archivos de transferencia
-#php_value upload_max_filesize 200M
-#php_value post_max_size 200M
-#php_value max_execution_time 1000
-#php_value max_input_time 1000
 
+# Deny access to sensitive files and environment variables
+<FilesMatch "^(?:\.env|configurar\.php|configurar\.user\.php|env\.php|.*\.sql|.*\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Deny direct access to private directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /SwiftFusePHP/
+    RewriteRule ^storage/ - [F,L]
+    RewriteRule ^App/ - [F,L]
+    RewriteRule ^Config/ - [F,L]
+
+    # Friendly URL rewriting
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ,_,.)]+)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+# Deny access to selected file types
+<FilesMatch "\.(htaccess|sql|git|gitignore|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Custom error pages
 ErrorDocument 404 /SwiftFusePHP/Vista/error/404_View.php
 ErrorDocument 400 /SwiftFusePHP/Vista/error/400_View.php
