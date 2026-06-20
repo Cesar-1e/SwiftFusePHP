@@ -4,6 +4,10 @@
  * Load environment variables from .env file if present.
  *
  * This is a minimal loader for PHP 8.4 and a lightweight framework.
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Support\Env. This procedural loader is
+ *             only used by the legacy entry point and is intentionally NOT loaded
+ *             by the new bootstrap. Removed in 1.0.
  */
 function loadEnvFile(string $path = null): void
 {

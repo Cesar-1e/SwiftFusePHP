@@ -7,6 +7,10 @@ require_once RUTA_APP . "Libreria/Controlador.user.php";
  * framework controllers in App/Controllers.
  * For proper view resolution, set:
  *     protected $folder = "{folder-name}";
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Http\Controller. New controllers should
+ *             live in app/Controllers and extend the namespaced base class.
+ *             Removed in 1.0.
  */
 abstract class Controlador extends ControladorUser
 {

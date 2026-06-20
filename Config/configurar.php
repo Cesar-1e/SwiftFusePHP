@@ -1,5 +1,21 @@
 <?php
 /**
+ * @deprecated 0.9.9 Legacy configuration and global helper functions.
+ *
+ * These procedural helpers have been reorganized into documented, English
+ * service classes:
+ *   - saveImg/saveFile/mkdirs/rmdir_r/filesToCURLFiles -> SwiftFuse\Support\Files
+ *     and SwiftFuse\Storage\* (App\Jobs\CompressImageJob for image processing)
+ *   - filterINPUT/isEmail                              -> SwiftFuse\Support\Validator
+ *   - stringWithQuotationMark/nullToZero               -> SwiftFuse\Support\Str
+ *   - formatCurrency/getDateInSpanish/getMonthInSpanish -> SwiftFuse\Support\Format
+ *   - error/setStatusCode/is_ssl/suspend               -> SwiftFuse\Http\* + ErrorHandler
+ *   - VERSION/HOST/...                                  -> config/*.php
+ *
+ * This file is kept for backward compatibility and will be removed in 1.0.
+ */
+
+/**
  * Versión del SwiftFusePHP.
  *
  * Esta constante define la versión actual del SwiftFusePHP.

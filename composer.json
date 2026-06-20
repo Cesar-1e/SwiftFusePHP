@@ -1,0 +1,28 @@
+{
+    "name": "cesar-1e/swiftfusephp",
+    "description": "SwiftFusePHP: an efficient and versatile PHP framework for seamless web development.",
+    "type": "project",
+    "keywords": ["framework", "mvc", "php", "swiftfusephp"],
+    "license": "MIT",
+    "require": {
+        "php": ">=8.4",
+        "ext-pdo": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "SwiftFuse\\": "src/SwiftFuse/",
+            "App\\": "app/"
+        },
+        "files": [
+            "src/SwiftFuse/Support/helpers.php"
+        ]
+    },
+    "bin": [
+        "fuse"
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

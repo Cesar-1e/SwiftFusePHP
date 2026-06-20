@@ -1,6 +1,10 @@
 <?php
 /**
  * Clase encargada de realizar la conexión mediante PDO a MySQL
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Database\Connection (same PDO-based API,
+ *             documented in English and configured via config/database.php).
+ *             Removed in 1.0.
  */
 class Conexion
 {

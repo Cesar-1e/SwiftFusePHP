@@ -1,6 +1,10 @@
 <?php
 /**
  * File delivery helper for SwiftFusePHP.
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Storage\StorageManager, which delivers
+ *             private files from outside the web root with authorization, X-Sendfile
+ *             support and HTTP Range streaming. Removed in 1.0.
  */
 class File
 {

@@ -1,0 +1,33 @@
+# SwiftFusePHP public web root.
+# The DocumentRoot should point at this directory so everything else stays private.
+
+# Disable directory listings.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Serve existing files directly (assets in css/, js/, ...).
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Route everything else (including the directory root) through the front
+    # controller as ?url=..., so $_GET['url'] is always set and resolution never
+    # depends on the request path's base directory.
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+# Never serve dotfiles (e.g. a stray .env) directly.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Custom error documents handled by the framework router.
+ErrorDocument 403 /index.php?url=error/403
+ErrorDocument 404 /index.php?url=error/404

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @deprecated 0.9.9 Migrate uploads to App\Controllers using SwiftFuse\Support\Files
+ *             and SwiftFuse\Storage\StorageManager. Removed in 1.0.
+ */
 class UploadControl extends Controlador
 {
 

@@ -4,6 +4,10 @@
  *
  * This service dispatches PHP scripts in a separate process.
  * It is designed for non-blocking background execution of lightweight jobs.
+ *
+ * @deprecated 0.9.9 Superseded by SwiftFuse\Queue\QueueManager and Worker, which
+ *             provide a structured job queue (file/async drivers) and the
+ *             "php fuse queue:work" command. Removed in 1.0.
  */
 class BackgroundService
 {

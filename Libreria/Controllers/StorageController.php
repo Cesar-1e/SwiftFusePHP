@@ -6,6 +6,9 @@ require_once RUTA_APP . "Libreria/Services/StorageService.php";
  *
  * This class is provided by the framework and can be extended by app-level
  * controllers without modifying framework files.
+ *
+ * @deprecated 0.9.9 Superseded by App\Controllers\StorageController +
+ *             SwiftFuse\Storage\StorageManager. Removed in 1.0.
  */
 abstract class StorageControllerBase extends Controlador
 {

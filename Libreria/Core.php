@@ -5,6 +5,10 @@
  *
  * The router prefers custom app controllers in App/Controllers over
  * framework controllers in Controlador/.
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Routing\Router and the public/index.php
+ *             front controller. Kept only for backward compatibility with the
+ *             legacy entry point; will be removed in 1.0.
  */
 class Core
 {

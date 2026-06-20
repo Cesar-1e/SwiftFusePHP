@@ -1,42 +1,35 @@
-# Deny directory browsing
+# SwiftFusePHP root .htaccess.
+#
+# RECOMMENDED (production): point the web server's DocumentRoot at the /public
+# directory; then this file is unnecessary and may be removed.
+#
+# FALLBACK (this file): when the DocumentRoot is the project root (e.g. a local
+# XAMPP/WAMP install serving http://localhost/SwiftFusePHP), this transparently
+# forwards every request into /public and blocks direct access to the framework
+# internals, so URLs like /SwiftFusePHP/js/main.js keep working.
+
 Options -Indexes
 
-# Deny access to sensitive files and environment variables
-<FilesMatch "^(?:\.env|configurar\.php|configurar\.user\.php|env\.php|.*\.sql|.*\.json)$">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        Order deny,allow
-        Deny from all
-    </IfModule>
-</FilesMatch>
-
-# Deny direct access to private directories
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /SwiftFusePHP/
-    RewriteRule ^storage/ - [F,L]
-    RewriteRule ^App/ - [F,L]
-    RewriteRule ^Config/ - [F,L]
 
-    # Friendly URL rewriting
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ,_,.)]+)$ index.php?url=$1 [QSA,L]
+    # 1) Block direct web access to framework internals and legacy code.
+    RewriteRule ^(src|app|config|bootstrap|storage|legacy|routes|resources|vendor|Controlador|Modelo|Libreria|Config|Errores|Includ|Vista|Archivos|DB)(/|$) - [F,L]
+
+    # 2) Forward everything else into /public. On the resulting pass, real files
+    #    under /public (assets) are served directly, and any other path falls
+    #    through to public/.htaccess -> index.php. The condition prevents a loop.
+    RewriteCond %{REQUEST_URI} !/public/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
-# Deny access to selected file types
-<FilesMatch "\.(htaccess|sql|git|gitignore|sh)$">
+# Never serve sensitive files directly (dotfiles, env, dumps, scripts).
+<FilesMatch "^\.|\.(env|sql|sh|lock)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
     <IfModule !mod_authz_core.c>
-        Order deny,allow
+        Order allow,deny
         Deny from all
     </IfModule>
 </FilesMatch>
-
-# Custom error pages
-ErrorDocument 404 /SwiftFusePHP/Vista/error/404_View.php
-ErrorDocument 400 /SwiftFusePHP/Vista/error/400_View.php

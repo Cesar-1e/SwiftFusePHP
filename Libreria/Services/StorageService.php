@@ -4,6 +4,10 @@
  *
  * This service resolves files inside the storage folder and streams them
  * only after authorization checks.
+ *
+ * @deprecated 0.9.9 Superseded by SwiftFuse\Storage\StorageManager, which adds
+ *             X-Sendfile/X-Accel-Redirect support and HTTP Range streaming.
+ *             Removed in 1.0.
  */
 class StorageService
 {

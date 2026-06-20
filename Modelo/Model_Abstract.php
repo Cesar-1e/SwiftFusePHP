@@ -2,8 +2,12 @@
 
 /**
  * Abstract class encarga en estar en todos los modelos
- * 
+ *
  * Establece conexión al motor
+ *
+ * @deprecated 0.9.9 Replaced by SwiftFuse\Database\Model. New models live in
+ *             app/Models, extend the namespaced base class and use
+ *             SwiftFuse\Database\Connection. Removed in 1.0.
  */
 abstract class Model{
     protected $Conexion;

@@ -4,8 +4,11 @@ require_once RUTA_APP . "Modelo/Entidad/Person_Entity.php";
 
 /**
  * Modelo de Person
- * 
+ *
  * Clase de ejemplo
+ *
+ * @deprecated 0.9.9 Replaced by App\Models\Person (extends SwiftFuse\Database\Model).
+ *             Removed in 1.0.
  */
 class PersonMode extends Model{
 

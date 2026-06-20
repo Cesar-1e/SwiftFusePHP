@@ -1,10 +1,33 @@
-Errores/error.log
-Archivos/*
-!Archivos/.htaccess
-!Archivos/scripts
-.vscode
-Public
+# Environment & secrets
 .env
+
+# Composer dependencies (optional; the framework also ships a built-in autoloader)
+/vendor/
+
+# Editor / OS
+.vscode/
+.DS_Store
+
+# Private storage: ignore contents but keep the directory structure
 storage/*
 !storage/.htaccess
 !storage/.gitkeep
+!storage/app/
+storage/app/*
+!storage/app/.gitkeep
+!storage/framework/
+storage/framework/*
+!storage/framework/.gitkeep
+!storage/logs/
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Logs
+*.log
+Errores/error.log
+
+# Legacy (deprecated) generated files
+Archivos/*
+!Archivos/.htaccess
+!Archivos/scripts
+!Archivos/DEPRECATED.md

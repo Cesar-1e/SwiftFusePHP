@@ -1,6 +1,10 @@
 <?php
 // User configuration using environment variables and defaults.
 // This file defines application constants and platform settings.
+//
+// @deprecated 0.9.9 Replaced by the config/*.php files (config/app.php,
+// config/database.php, config/storage.php, config/queue.php), read via the
+// config() helper. Kept for the legacy entry point; removed in 1.0.
 
 date_default_timezone_set(env('APP_TIMEZONE', 'America/Bogota'));
 define('APP_ENV', env('APP_ENV', 'production'));
