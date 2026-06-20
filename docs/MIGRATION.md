@@ -1,5 +1,7 @@
 # Migrating to the new SwiftFusePHP structure
 
+[← Back to README](../README.md)
+
 Starting with `0.9.9`, SwiftFusePHP ships a new, English, PSR-4 core in
 `src/SwiftFuse/` and a developer space in `app/`, served from a `public/` web
 root. The previous (Spanish) layout still works but is **`@deprecated`** and will

@@ -1,5 +1,7 @@
 # Extending SwiftFusePHP
 
+[← Back to README](../README.md)
+
 The framework core in `src/SwiftFuse/` is meant to stay untouched. You customize
 and extend behavior entirely from `app/`, using four complementary mechanisms.
 Pick the lightest one that fits your need.
