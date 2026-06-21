@@ -30,15 +30,31 @@ old controller until you create the new one (the new one always wins).
 
 ### Legacy views and assets
 
-Legacy views in `Vista/` reference assets (`CSS/`, `JS/`, `Includ/`) using the
-old paths, which now live **outside** `public/`. The page will render, but its
-styles/scripts may 404. To keep a legacy page looking right until you migrate it,
-copy the asset folders it needs into `public/`:
+Public assets now live under **`public/css`** and **`public/js`** — note the
+**lowercase** folder names. The framework serves and references them in lowercase
+(e.g. `base_url('js/main.js')`).
 
-```bash
-cp -r CSS public/CSS
-cp -r JS  public/JS
-```
+The legacy code used **uppercase** folders (`CSS/`, `JS/`) at the project root,
+which are now **outside** `public/` and therefore not web-accessible. Because
+Linux file systems are **case-sensitive**, a request for `public/JS/main.js` does
+**not** resolve to `public/js/main.js`, so legacy views that point at the old
+uppercase paths will 404 on their assets.
+
+When migrating, **move your assets to lowercase** and update the references:
+
+1. Put the files under `public/css/` and `public/js/` (lowercase).
+2. Update the legacy references from uppercase to lowercase, e.g. in
+   `Includ/head.php` and `Vista/<folder>/<name>_View.php`:
+
+   ```diff
+   - <script src="<?= RUTA_URL ?>JS/main.js"></script>
+   + <script src="<?= RUTA_URL ?>js/main.js"></script>
+   - <link rel="stylesheet" href="<?= RUTA_URL ?>CSS/style.css">
+   + <link rel="stylesheet" href="<?= RUTA_URL ?>css/style.css">
+   ```
+
+3. Remove the now-duplicated uppercase `CSS/` and `JS/` folders at the project
+   root once nothing references them.
 
 > Do **not** move the DocumentRoot back to the project root to "restore" the old
 > site. That re-exposes `storage/`, `.env` and `config/` to the web and undoes

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <?php require_once RUTA_APP . "Includ/head.php";?>
-    <script src="<?= RUTA_URL;?>JS/person.js"></script>
-    <title><?php echo SITE_NAME;?></title>
+    <script src="<?= RUTA_URL;?>js/person.js"></script>
+    <title><?php echo NOMBRESITIO;?></title>
 </head>
 <body>
     <h1>Editame</h1>

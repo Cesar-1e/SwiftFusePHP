@@ -8,7 +8,6 @@ error_reporting(0);
 session_start();
 require_once "Errores/log.php";
 require_once "Config/configurar.php";
-require_once "Config/env.php";
 if (isset($argv)) {
     handler(E_ERROR, $argv[1], __FILE__, __LINE__);
     die();

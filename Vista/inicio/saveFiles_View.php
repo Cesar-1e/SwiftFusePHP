@@ -3,7 +3,7 @@
 
 <head>
     <?php require_once RUTA_APP . "Includ/head.php"; ?>
-    <title><?php echo SITE_NAME; ?></title>
+    <title><?php echo NOMBRESITIO; ?></title>
 </head>
 
 <body>
@@ -23,12 +23,12 @@
         function saveImg() {
             let parameters = formData("#frmImageUpload");
 
-            ajax("Upload/Img", (response) => {
+            ajax("Upload_Old/Img", (response) => {
                 if (response.exito) {
                     alert("Imagen guardada correctamente");
                     response.data.forEach(file => {
                         let imgElement = document.createElement("img");
-                        imgElement.src = RUTA + "Storage/serve/Images/" + file;
+                        imgElement.src = RUTA + "Public/Uploads/Images/" + file;
                         imgElement.width = 200;
                         document.getElementById("spanFilesImg").appendChild(imgElement);
                     });
