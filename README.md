@@ -261,6 +261,7 @@ Both scenarios are covered step by step in **[docs/INSTALLATION.md](docs/INSTALL
 | [docs/STORAGE.md](docs/STORAGE.md) | Private storage, streaming, signed URLs, uploads, X-Sendfile. |
 | [docs/QUEUE.md](docs/QUEUE.md) | Background jobs, queue drivers, the worker. |
 | [docs/CLI.md](docs/CLI.md) | The `fuse` command-line tool. |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture standard: pattern, layers, where logic lives, data access, folder structure, what not to edit. |
 | [docs/EXTENDING.md](docs/EXTENDING.md) | Extending the core without editing it. |
 | [docs/STANDARD.md](docs/STANDARD.md) | Development standard: naming, format, error handling, logging, comments, dependencies, anti-patterns. |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Migrate a legacy project (includes a migration prompt). |
