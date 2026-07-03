@@ -67,6 +67,7 @@ and read them with `config('mail.host')`.
 | [`config/database.php`](../config/database.php) | `SwiftFuse\Database\Connection` | `driver`, `host`, `port`, `database`, `username`, `password`, `charset`, `persistent`, `ssl_ca` |
 | [`config/storage.php`](../config/storage.php) | `SwiftFuse\Storage\StorageManager` | `root`, `accel`, `nginx_internal` |
 | [`config/queue.php`](../config/queue.php) | `SwiftFuse\Queue\*` | `driver`, `path`, `php_binary` |
+| [`config/assets.php`](../config/assets.php) | `php fuse assets:publish` | `source => destination` map for third-party assets |
 | [`config/services.php`](../config/services.php) | the service container | maps a contract/class → factory closure |
 
 ### Adding your own config

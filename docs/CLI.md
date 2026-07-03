@@ -55,6 +55,55 @@ Scaffold a background job in `app/Jobs/` implementing `JobInterface`.
 php fuse make:job SendWelcomeEmail    # -> app/Jobs/SendWelcomeEmail.php
 ```
 
+### `assets:publish [--force] [--link]`
+
+Publish third-party assets into the public web root — **without npm or a
+bundler**. It reads the `source => destination` map in
+[`config/assets.php`](../config/assets.php), where sources are relative to the
+project root and destinations are relative to `public/`, then copies each entry
+(creating directories as needed) and reports what was published, skipped or
+missing.
+
+```bash
+php fuse assets:publish            # copy configured assets into public/
+php fuse assets:publish --force    # overwrite existing destinations
+php fuse assets:publish --link     # symlink instead of copy (falls back to copy)
+```
+
+| Flag | Effect |
+|------|--------|
+| *(none)* | Copy each asset; skip destinations that already exist. |
+| `--force` | Overwrite destinations that already exist. |
+| `--link` | Create a symlink instead of copying. If the OS/host forbids symlinks, it transparently falls back to a copy (reported as `copied*`). |
+
+The exit code is non-zero when any source is **missing** or a copy **fails**, so
+it composes with CI.
+
+**Configuring assets** — the map is source-agnostic (npm, Composer, or a manual
+download):
+
+```php
+// config/assets.php
+return [
+    'node_modules/htmx.org/dist/htmx.min.js' => 'assets/htmx/htmx.min.js',
+    'vendor/twbs/bootstrap/dist/css/bootstrap.min.css' => 'assets/bootstrap/bootstrap.min.css',
+];
+```
+
+Reference a published asset from a view with `base_url()`:
+
+```php
+<script src="<?= base_url('assets/htmx/htmx.min.js') ?>"></script>
+```
+
+**Recommendations:**
+
+- Publish under **`public/assets/`** (as above). Do **not** use `public/vendor/`:
+  the project's root `.htaccess` blocks a top-level `/vendor` path.
+- **Git-ignore the destination** — published files are generated. `/public/assets/`
+  is already in `.gitignore`; run `assets:publish` after a clean checkout (and add
+  it to your deploy step).
+
 ## Adding your own commands
 
 Commands are dispatched by `SwiftFuse\Console\Kernel`. To keep the core untouched
