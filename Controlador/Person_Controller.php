@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @deprecated 0.9.9 Migrate to App\Controllers (extends SwiftFuse\Http\Controller)
+ *             and App\Models\Person. Removed in 1.0.
+ */
 class PersonControl extends Controlador
 {
     private $Person;

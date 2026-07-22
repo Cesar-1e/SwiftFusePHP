@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <?php require_once RUTA_APP . "Includ/head.php";?>
-    <script src="<?= RUTA_URL;?>JS/person.js"></script>
+    <script src="<?= RUTA_URL;?>js/person.js"></script>
     <title><?php echo NOMBRESITIO;?></title>
 </head>
 <body>

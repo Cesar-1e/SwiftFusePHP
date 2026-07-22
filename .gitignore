@@ -1,6 +1,40 @@
+# Environment & secrets
+.env
+
+# Composer dependencies (optional; the framework also ships a built-in autoloader)
+/vendor/
+
+# npm dependencies (only ever used as a source for `php fuse assets:publish`)
+/node_modules/
+
+# Third-party assets published into the web root by `php fuse assets:publish`.
+# These are generated from config/assets.php; republish them after a clean checkout.
+/public/assets/
+
+# Editor / OS
+.vscode/
+.DS_Store
+
+# Private storage: ignore contents but keep the directory structure
+storage/*
+!storage/.htaccess
+!storage/.gitkeep
+!storage/app/
+storage/app/*
+!storage/app/.gitkeep
+!storage/framework/
+storage/framework/*
+!storage/framework/.gitkeep
+!storage/logs/
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Logs
+*.log
 Errores/error.log
+
+# Legacy (deprecated) generated files
 Archivos/*
 !Archivos/.htaccess
 !Archivos/scripts
-.vscode
-Public
+!Archivos/DEPRECATED.md

@@ -1,6 +1,11 @@
 <?php
 
-	define('E_FATAL',  E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR | 
+	/**
+	 * @deprecated 0.9.9 Replaced by SwiftFuse\Foundation\ErrorHandler, which logs
+	 *             to storage/logs/error.log and renders error views. Kept for the
+	 *             legacy entry point; removed in 1.0.
+	 */
+	define('E_FATAL',  E_ERROR | E_USER_ERROR | E_PARSE | E_CORE_ERROR |
 	        E_COMPILE_ERROR | E_RECOVERABLE_ERROR);
 	define('ENV', 'dev');
 	//Manejo de errores personalizado

@@ -1,26 +1,35 @@
-#Denegar acceso directorios sin index
-Options -Indexes
-# Denegar acceso a los siguientes archivos
-<FilesMatch "\.(htaccess|sql|git|gitignore|sh)$">
-Order Allow,Deny
-Deny from all
-</FilesMatch>
-#Archivo que no exista se redireccionara al index.php
-<IfModule mod_rewrite.c>
-#Desactivar multivistas
-Options -Multiviews
-#Rescritura amigable
-RewriteEngine On
-RewriteBase /SwiftFusePHP/
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([-a-zA-Z0-9/(í,ú,á,ñ)]+)$ index.php?url=$1 [QSA,L]
-</IfModule>
-#Establece tamaño de archivos de transferencia
-#php_value upload_max_filesize 200M
-#php_value post_max_size 200M
-#php_value max_execution_time 1000
-#php_value max_input_time 1000
+# SwiftFusePHP root .htaccess.
+#
+# RECOMMENDED (production): point the web server's DocumentRoot at the /public
+# directory; then this file is unnecessary and may be removed.
+#
+# FALLBACK (this file): when the DocumentRoot is the project root (e.g. a local
+# XAMPP/WAMP install serving http://localhost/SwiftFusePHP), this transparently
+# forwards every request into /public and blocks direct access to the framework
+# internals, so URLs like /SwiftFusePHP/js/main.js keep working.
 
-ErrorDocument 404 /SwiftFusePHP/Vista/error/404_View.php
-ErrorDocument 400 /SwiftFusePHP/Vista/error/400_View.php
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1) Block direct web access to framework internals and legacy code.
+    RewriteRule ^(src|app|config|bootstrap|storage|legacy|routes|resources|vendor|Controlador|Modelo|Libreria|Config|Errores|Includ|Vista|Archivos|DB)(/|$) - [F,L]
+
+    # 2) Forward everything else into /public. On the resulting pass, real files
+    #    under /public (assets) are served directly, and any other path falls
+    #    through to public/.htaccess -> index.php. The condition prevents a loop.
+    RewriteCond %{REQUEST_URI} !/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Never serve sensitive files directly (dotfiles, env, dumps, scripts).
+<FilesMatch "^\.|\.(env|sql|sh|lock)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

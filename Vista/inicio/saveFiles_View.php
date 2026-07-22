@@ -23,7 +23,7 @@
         function saveImg() {
             let parameters = formData("#frmImageUpload");
 
-            ajax("Upload/Img", (response) => {
+            ajax("Upload_Old/Img", (response) => {
                 if (response.exito) {
                     alert("Imagen guardada correctamente");
                     response.data.forEach(file => {

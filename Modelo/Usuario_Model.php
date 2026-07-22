@@ -4,8 +4,11 @@ require_once RUTA_APP . "Modelo/Entidad/Usuario_Entity.php";
 
 /**
  * Modelo de Usuario
- * 
+ *
  * Clase de ejemplo
+ *
+ * @deprecated 0.9.9 Migrate to App\Models (extends SwiftFuse\Database\Model).
+ *             Removed in 1.0.
  */
 class UsuarioMode extends Model{
 

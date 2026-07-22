@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * SwiftFusePHP command-line entry point.
+ *
+ * Usage:
+ *   php fuse <command> [arguments]
+ *
+ * Run "php fuse list" to see the available commands.
+ */
+
+declare(strict_types=1);
+
+use SwiftFuse\Console\Kernel;
+
+if (PHP_SAPI !== 'cli') {
+    fwrite(STDERR, 'The fuse CLI must be run from the command line.' . PHP_EOL);
+    exit(1);
+}
+
+// Bootstrap the framework (autoload, env, config) without handling a request.
+require __DIR__ . '/bootstrap/app.php';
+
+exit((new Kernel())->handle($argv));

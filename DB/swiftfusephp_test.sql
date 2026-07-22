@@ -18,10 +18,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `framework_test`
+-- Base de datos: `swiftfusephp_test`
 --
-CREATE DATABASE IF NOT EXISTS `framework_test` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-USE `framework_test`;
+CREATE DATABASE IF NOT EXISTS `swiftfusephp_test` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `swiftfusephp_test`;
 
 DELIMITER $$
 --
