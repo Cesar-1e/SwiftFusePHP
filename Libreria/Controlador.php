@@ -18,46 +18,43 @@ abstract class Controlador extends ControladorUser
     protected $folder = "";
     
     /**
-     * Default action.
-     * If the view is missing, execution stops and a 404 is returned.
-     *
-     * @param string $archivo
-     * @param array $data
+     * Metodo por Default
+     * Si el archivo no existe se detiene la ejecución y saldra ERROR 404
+     * 
+     * Este metodo se puede sobreescribir
+     * @param String $archivo Nombre del archivo 
+     * @param Array $data Parametros desde la URL
      */
-    public function cargaVista($archivo, $data)
-    {
-        if (count($data) === 0) {
+    public function cargaVista($archivo, $data){
+        if(count($data) == 0 ){
             $this->vista($this->folder . '/' . lcfirst($archivo), $data);
-        } else {
+        }else{
             error(404);
         }
     }
 
     /**
-     * Load a model class from App/Models first, then fallback to Modelo/.
-     *
-     * @param string $modelo
-     * @return object
+     * Require el modelo y return instanciado el object
+     * 
+     * @var $modelo El modelo a requerir e instanciar
+     * 
+     * @return Object
      */
     public function modelo($modelo)
     {
-        $customModel = "App/Models/" . $modelo . "_Model.php";
-        if (file_exists($customModel)) {
-            require_once $customModel;
-        } else {
-            require_once "Modelo/" . $modelo . "_Model.php";
-        }
-
-        $parts = explode("/", $modelo);
-        $modelo = $parts[count($parts) - 1] . "Mode";
+        require_once "Modelo/" . $modelo . "_Model.php";
+        $modelo = explode("/", $modelo);
+        $modelo = $modelo[count($modelo)-1] . "Mode";
         return new $modelo;
     }
 
+        
     /**
-     * Render a view by checking HTML first, then PHP.
+     * Require vista, Se le da prioriodad el .html, luego el .php
      *
-     * @param string $vista
-     * @param array $parametro
+     * En el caso de que la vista no existe, se redirreciona al error 404
+     * @param  string $vista Vista a visualizar
+     * @param  array $parametro parametros para enviar a la vista; Opcional
      * @return void
      */
     public function vista($vista, $parametro = [])
@@ -75,9 +72,9 @@ abstract class Controlador extends ControladorUser
         }
         ($isExist ?: error(404));
     }
-
+    
     /**
-     * Output the standard JSON response.
+     * Realiza un echo con el contenido del atributo $retorno en String JSON
      *
      * @return void
      */
@@ -87,4 +84,3 @@ abstract class Controlador extends ControladorUser
         die();
     }
 }
- 
