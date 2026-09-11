@@ -6,7 +6,7 @@
 
 Boost productivity with its modular architecture and smooth integration capabilities.
 
-`PHP 8.4` · `PSR-4` · `MVC` · `PDO` · `version 0.9.9`
+`PHP 8.4` · `PSR-4` · `MVC` · `PDO` · `version 0.10.0`
 
 </div>
 
@@ -28,6 +28,7 @@ Boost productivity with its modular architecture and smooth integration capabili
   - [The `fuse` CLI](#the-fuse-cli)
   - [Extending the core](#extending-the-core)
 - [Deployment](#deployment)
+- [Running the tests](#running-the-tests)
 - [Documentation](#documentation)
 - [Backward compatibility](#backward-compatibility)
 - [License](#license)
@@ -59,15 +60,15 @@ It is designed around four principles:
 
 | Area | What you get |
 |------|--------------|
-| **Autoloading** | PSR-4 with a built-in autoloader — no `composer install` required, fully Composer-compatible. |
+| **Autoloading** | PSR-4 with a built-in autoloader — no `composer install` required, fully Composer-compatible; extra `composer.json` roots load even without Composer. |
 | **Web root** | `public/` is the only exposed directory; core, `config/`, `.env` and `storage/` are private by construction. |
-| **MVC + PDO** | Documented `Controller`, `Model` and PDO `Connection` with prepared statements and transactions. |
+| **MVC + PDO** | Documented `Controller`, `Model` and PDO `Connection` with prepared statements and transactions, including transactions across models on an opt-in shared connection. |
 | **Routing** | Convention-based (`/{controller}/{method}/{params}`) plus optional explicit routes with `{placeholders}`. |
 | **Protected files** | `StorageManager` streams private files only after authorization, via X-Sendfile / X-Accel-Redirect or chunked HTTP **Range** streaming. |
 | **Signed URLs** | Short-lived, tamper-proof links (HMAC) to embed protected media in HTML. |
 | **Background queue** | File-based job queue + `fuse queue:work` worker, with an optional fire-and-forget `async` driver. |
 | **CLI** | `fuse` tool: `key:generate`, `queue:work`, `make:controller`, `make:job`. |
-| **Extensibility** | Inheritance, a service container, runtime macros (`Extensible`) and hooks/events. |
+| **Extensibility** | Inheritance, a service container that also resolves controllers, per-class runtime macros (`Extensible`) and hooks/events with priorities and filters. |
 
 ## Requirements
 
@@ -116,6 +117,7 @@ SwiftFusePHP/
 ├── storage/             # Private files, queued jobs, logs (outside web root)
 ├── bootstrap/           # Autoloader + application bootstrap
 ├── docs/                # Detailed documentation
+├── tests/               # Framework test scripts (php tests/run.php)
 ├── .env / .env.example  # Environment
 ├── composer.json        # Optional Composer integration
 └── fuse                 # Command-line tool
@@ -249,6 +251,21 @@ Full details: **[docs/EXTENDING.md](docs/EXTENDING.md)**.
 
 Both scenarios are covered step by step in **[docs/INSTALLATION.md](docs/INSTALLATION.md)**.
 
+## Running the tests
+
+The framework ships dependency-free test scripts in `tests/`:
+
+```bash
+php tests/run.php               # run every script
+php tests/run.php transaction   # run the scripts whose name contains "transaction"
+```
+
+Each script runs in its own PHP process and exits with a non-zero code when a
+case fails. The database tests read the `DB_*` settings (environment or `.env`),
+need a MySQL user allowed to create and drop tables, work on their own
+`swiftfuse_test_*` tables, and are reported as skipped when no database is
+reachable.
+
 ## Documentation
 
 | Guide | Contents |
@@ -265,6 +282,7 @@ Both scenarios are covered step by step in **[docs/INSTALLATION.md](docs/INSTALL
 | [docs/EXTENDING.md](docs/EXTENDING.md) | Extending the core without editing it. |
 | [docs/STANDARD.md](docs/STANDARD.md) | Development standard: naming, format, error handling, logging, comments, dependencies, anti-patterns. |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Migrate a legacy project (includes a migration prompt). |
+| [CHANGELOG.md](CHANGELOG.md) | Release notes and upgrade notes for each version. |
 
 ## Backward compatibility
 
@@ -277,4 +295,4 @@ It will be removed in `1.0`. See [docs/MIGRATION.md](docs/MIGRATION.md).
 
 See [LICENSE](LICENSE).
 
-<div align="center"><sub>SwiftFusePHP · version 0.9.9</sub></div>
+<div align="center"><sub>SwiftFusePHP · version 0.10.0</sub></div>

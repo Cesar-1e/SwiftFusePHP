@@ -61,6 +61,20 @@ final class Application extends Container
     }
 
     /**
+     * Determine whether an application instance has been bootstrapped.
+     *
+     * Lets framework code resolve objects through the container inside an
+     * application and fall back to plain instantiation without one (e.g. in
+     * console scripts or tests).
+     *
+     * @return bool
+     */
+    public static function hasInstance(): bool
+    {
+        return self::$instance !== null;
+    }
+
+    /**
      * Register service bindings from a configuration map.
      *
      * Each entry maps an abstract identifier to a factory closure, enabling

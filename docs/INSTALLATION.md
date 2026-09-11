@@ -130,3 +130,8 @@ To confirm privatization, requesting `/.env`, `/config/...`, `/src/...` or
 SwiftFusePHP does **not** require Composer. If you want to pull in third-party
 libraries, run `composer install` — the built-in autoloader detects
 `vendor/autoload.php` automatically and loads it alongside the framework.
+
+Without `vendor/`, the built-in autoloader also registers the `autoload.psr-4`
+roots declared in `composer.json` (for example `"Extensions\\": "extensions/"`),
+as long as their directories are inside the project — see
+[EXTENDING.md](EXTENDING.md#5-your-own-namespaces-psr-4-roots).

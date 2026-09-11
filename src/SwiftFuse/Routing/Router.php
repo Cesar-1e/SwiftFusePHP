@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SwiftFuse\Routing;
 
+use SwiftFuse\Foundation\Application;
 use SwiftFuse\Http\Controller;
 use SwiftFuse\Http\HttpException;
 use SwiftFuse\Http\Request;
 use SwiftFuse\Support\Extensible;
+use UnexpectedValueException;
 
 /**
  * HTTP router.
@@ -18,11 +20,20 @@ use SwiftFuse\Support\Extensible;
  *      App\Controllers\{Controller}Controller, falling back to a bridge that
  *      loads the legacy Controlador/ classes for backward compatibility.
  *
- * The Extensible trait allows adding routing helpers without editing the core.
+ * Controllers are created through the application container when one is
+ * bootstrapped, so a binding can decorate or replace them. The Extensible trait
+ * allows adding routing helpers without editing the core.
  */
 final class Router
 {
     use Extensible;
+
+    /**
+     * Controller lifecycle methods that convention routing never dispatches as actions (lowercase).
+     *
+     * @var array<int, string>
+     */
+    private const LIFECYCLE_METHODS = ['enteraction', 'leaveaction'];
 
     /**
      * Explicit routes, grouped by HTTP method.
@@ -81,6 +92,7 @@ final class Router
      * @return void
      *
      * @throws HttpException When no controller/action can be resolved.
+     * @throws UnexpectedValueException When the container resolves a controller class to something else.
      */
     public function dispatch(Request $request): void
     {
@@ -123,7 +135,9 @@ final class Router
 
             if (is_array($handler)) {
                 [$class, $method] = $handler;
-                $this->runModern(new $class(), $method, array_values($params));
+                // A handler given as [$object, 'method'] has always dispatched to a fresh instance of its class.
+                $controller = $this->makeController(is_object($class) ? $class::class : $class);
+                $this->runModern($controller, $method, array_values($params));
             } else {
                 $handler(...array_values($params));
             }
@@ -155,7 +169,7 @@ final class Router
 
         if ($controller instanceof Controller) {
             $action = 'index';
-            if (isset($segments[0]) && method_exists($controller, $segments[0])) {
+            if (isset($segments[0]) && $this->isRoutableAction($controller, $segments[0])) {
                 $action = array_shift($segments);
             }
             $this->runModern($controller, $action, array_values($segments));
@@ -168,7 +182,8 @@ final class Router
     /**
      * Resolve a controller short name to an instance.
      *
-     * Prefers App\Controllers\{Name}Controller, then bridges to the legacy
+     * Prefers App\Controllers\{Name}Controller, created through the container
+     * when an application is bootstrapped, then bridges to the legacy
      * Controlador/{Name}_Controller.php class for backward compatibility.
      *
      * @param string $name Controller short name (PascalCase).
@@ -178,16 +193,60 @@ final class Router
     {
         $class = "App\\Controllers\\{$name}Controller";
         if (class_exists($class)) {
-            return new $class();
+            return $this->makeController($class);
         }
 
         return LegacyBridge::resolve($name);
     }
 
     /**
+     * Create a controller, through the application container when one is bootstrapped.
+     *
+     * Resolving through the container lets an application decorate or replace a
+     * controller with a binding. Without an application (e.g. console scripts or
+     * tests) the class is instantiated directly, as in earlier versions.
+     *
+     * @param class-string $class Controller class name.
+     * @return object The controller instance.
+     *
+     * @throws UnexpectedValueException When a controller class resolves to something that is not a controller.
+     */
+    private function makeController(string $class): object
+    {
+        $controller = Application::hasInstance() ? Application::getInstance()->make($class) : new $class();
+
+        if (is_subclass_of($class, Controller::class) && !$controller instanceof Controller) {
+            throw new UnexpectedValueException(sprintf(
+                'The container must resolve [%s] to an instance of %s, %s given.',
+                $class,
+                Controller::class,
+                get_debug_type($controller)
+            ));
+        }
+
+        return $controller;
+    }
+
+    /**
+     * Determine whether a URL segment names an action that convention routing may dispatch.
+     *
+     * @param Controller $controller The resolved controller.
+     * @param string $segment Candidate action taken from the URL.
+     * @return bool
+     */
+    private function isRoutableAction(Controller $controller, string $segment): bool
+    {
+        return method_exists($controller, $segment)
+            && !in_array(strtolower($segment), self::LIFECYCLE_METHODS, true);
+    }
+
+    /**
      * Invoke a modern controller action wrapped by its before/after hooks.
      *
-     * Parameters are spread as individual arguments to the action.
+     * Parameters are spread as individual arguments to the action. The
+     * controller learns the action and its parameters before the before-hook
+     * runs, and runs the after-hook once: here when the action returns, or from
+     * json() when app.json_lifecycle is enabled.
      *
      * @param Controller $controller The controller instance.
      * @param string $action The method to call.
@@ -198,12 +257,12 @@ final class Router
      */
     private function runModern(Controller $controller, string $action, array $params): void
     {
-        if ($controller->before($action, $params) === false) {
+        if ($controller->enterAction($action, $params) === false) {
             throw new HttpException(403, 'Request blocked by controller hook.');
         }
 
         $controller->{$action}(...$params);
-        $controller->after($action, $params);
+        $controller->leaveAction();
     }
 
     /**

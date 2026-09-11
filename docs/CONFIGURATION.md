@@ -37,11 +37,12 @@ env('APP_DEBUG', false);        // casts "true"/"false"/"null" to native types
 | `APP_NAME` | `SwiftFusePHP` | Application name. |
 | `APP_ENV` | `production` | Environment name (`local`, `production`, …). |
 | `APP_DEBUG` | `false` | Verbose errors when `true`. Set `false` in production. |
-| `APP_VERSION` | `0.9.9` | Application version string. |
+| `APP_VERSION` | `0.10.0` | Application version string. |
 | `APP_URL` | `http://localhost` | Base URL used by `base_url()` and signed URLs. |
 | `APP_LOCALE` | `en` | Locale for `SwiftFuse\Support\Format` (ICU). |
 | `APP_TIMEZONE` | `UTC` | Default timezone. |
 | `APP_KEY` | *(empty)* | HMAC key for signed URLs. Generate with `php fuse key:generate`. |
+| `APP_JSON_LIFECYCLE` | `false` | When `true`, `json()` runs the controller `after()` hook once before responding. See [CONTROLLERS.md](CONTROLLERS.md#the-after-hook-on-json-responses-app_json_lifecycle). |
 | `DB_DRIVER` | `mysql` | PDO driver. |
 | `DB_HOST` | `localhost` | Database host. |
 | `DB_PORT` | `3306` | Database port. |
@@ -51,6 +52,7 @@ env('APP_DEBUG', false);        // casts "true"/"false"/"null" to native types
 | `DB_CHARSET` | `utf8mb4` | Connection charset. |
 | `DB_PERSISTENT` | `true` | Use persistent PDO connections. |
 | `DB_SSL_CA` | *(empty)* | Path to an SSL CA bundle (managed/cloud databases). |
+| `DB_SHARED_CONNECTION` | `false` | When `true`, every model shares one PDO handle, as `Transaction::run()` requires. See [DATABASE.md](DATABASE.md#transactions-across-models). |
 | `STORAGE_ACCEL` | `none` | Protected delivery: `none`, `apache`, `nginx`. |
 | `STORAGE_NGINX_INTERNAL` | `/protected/` | Internal location for X-Accel-Redirect. |
 | `QUEUE_DRIVER` | `file` | Background queue driver: `file` or `async`. |
@@ -63,12 +65,17 @@ and read them with `config('mail.host')`.
 
 | File | Consumed by | Notable keys |
 |------|-------------|--------------|
-| [`config/app.php`](../config/app.php) | core, helpers | `name`, `env`, `debug`, `url`, `locale`, `timezone`, `key` |
-| [`config/database.php`](../config/database.php) | `SwiftFuse\Database\Connection` | `driver`, `host`, `port`, `database`, `username`, `password`, `charset`, `persistent`, `ssl_ca` |
+| [`config/app.php`](../config/app.php) | core, helpers | `name`, `env`, `debug`, `url`, `locale`, `timezone`, `key`, `json_lifecycle` |
+| [`config/database.php`](../config/database.php) | `SwiftFuse\Database\Connection` | `driver`, `host`, `port`, `database`, `username`, `password`, `charset`, `persistent`, `ssl_ca`, `shared_connection` |
 | [`config/storage.php`](../config/storage.php) | `SwiftFuse\Storage\StorageManager` | `root`, `accel`, `nginx_internal` |
 | [`config/queue.php`](../config/queue.php) | `SwiftFuse\Queue\*` | `driver`, `path`, `php_binary` |
 | [`config/assets.php`](../config/assets.php) | `php fuse assets:publish` | `source => destination` map for third-party assets |
 | [`config/services.php`](../config/services.php) | the service container | maps a contract/class → factory closure |
+
+An environment variable only takes effect through the config file that reads it.
+If your project keeps its own copies of `config/app.php` or `config/database.php`
+from an earlier version, add the `json_lifecycle` and `shared_connection` keys
+shown in the framework's files; without them both options stay disabled.
 
 ### Adding your own config
 

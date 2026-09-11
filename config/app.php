@@ -14,7 +14,7 @@ return [
     'name'     => env('APP_NAME', 'SwiftFusePHP'),
     'env'      => env('APP_ENV', 'production'),
     'debug'    => (bool) env('APP_DEBUG', false),
-    'version'  => env('APP_VERSION', '0.9.9'),
+    'version'  => env('APP_VERSION', '0.10.0'),
 
     // Base URL used to build absolute links and signed URLs.
     'url'      => env('APP_URL', 'http://localhost'),
@@ -25,6 +25,10 @@ return [
 
     // Application signing key (used by signed URLs). Generate with: php fuse key:generate
     'key'      => env('APP_KEY', ''),
+
+    // Run the controller after-hook ("controller.after") once when an action answers with json().
+    // Disabled by default, matching earlier versions, which skip it on JSON responses.
+    'json_lifecycle' => (bool) env('APP_JSON_LIFECYCLE', false),
 
     // Third-party integrations.
     'recaptcha_key' => env('RECAPTCHA_KEY', ''),

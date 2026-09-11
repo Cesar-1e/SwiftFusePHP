@@ -19,4 +19,8 @@ return [
     'charset'    => env('DB_CHARSET', 'utf8mb4'),
     'persistent' => (bool) env('DB_PERSISTENT', true),
     'ssl_ca'     => env('DB_SSL_CA', ''),
+
+    // Reuse one PDO handle per DSN and user for every model of the request, so
+    // SwiftFuse\Database\Transaction::run() can commit or roll back their writes together.
+    'shared_connection' => (bool) env('DB_SHARED_CONNECTION', false),
 ];

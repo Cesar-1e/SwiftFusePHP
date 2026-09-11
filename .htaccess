@@ -14,7 +14,7 @@ Options -Indexes
     RewriteEngine On
 
     # 1) Block direct web access to framework internals and legacy code.
-    RewriteRule ^(src|app|config|bootstrap|storage|legacy|routes|resources|vendor|Controlador|Modelo|Libreria|Config|Errores|Includ|Vista|Archivos|DB)(/|$) - [F,L]
+    RewriteRule ^(src|app|config|bootstrap|storage|legacy|routes|resources|tests|vendor|Controlador|Modelo|Libreria|Config|Errores|Includ|Vista|Archivos|DB)(/|$) - [F,L]
 
     # 2) Forward everything else into /public. On the resulting pass, real files
     #    under /public (assets) are served directly, and any other path falls

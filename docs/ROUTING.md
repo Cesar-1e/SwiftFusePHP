@@ -41,6 +41,9 @@ Rules:
 - If the second segment is a real method on the controller, it becomes the
   **action**; otherwise the action stays `index` and the segment is passed as the
   first parameter (so `/home/about` calls `index('about')`).
+- The controller lifecycle methods `enterAction` and `leaveAction` are never
+  actions: a segment with one of those names is passed to `index()` like any other
+  unknown segment.
 - Remaining segments are spread as individual string arguments to the action.
 
 ## Explicit routes
@@ -78,6 +81,16 @@ A handler can also be a closure:
 $router->get('ping', fn () => print('pong'));
 ```
 
+## How controllers are created
+
+Both strategies create the controller through the application container when an
+application is bootstrapped, which is the case for every web request. A container
+binding can therefore decorate or replace a controller without editing its file or
+its routes — see
+[CONTROLLERS.md](CONTROLLERS.md#decorating-or-replacing-a-controller). Without an
+application (for example in a console script or a test), the class is instantiated
+directly. Closure handlers are called as they are.
+
 ## Custom routing helpers (macros)
 
 `Router` uses the `Extensible` trait, so you can add routing helpers at runtime
@@ -86,10 +99,18 @@ without editing the core — see
 
 ## Lifecycle hooks
 
-Before an action runs, the controller's `before()` hook fires (and the global
-`controller.before` event); after it runs, `after()` fires. Returning `false`
-from `before()` (or a `controller.before` listener) aborts the request with a
-**403**. See [CONTROLLERS.md](CONTROLLERS.md#lifecycle-hooks).
+For every controller action, the router:
+
+1. tells the controller which action and parameters it is dispatching, and runs
+   its `before()` hook (which fires the global `controller.before` event).
+   Returning `false` from `before()` (or a `controller.before` listener) aborts the
+   request with a **403**;
+2. calls the action;
+3. runs `after()` (which fires `controller.after`) once, when the action returns.
+
+An action that answers with `json()` ends the request before step 3. Set
+`APP_JSON_LIFECYCLE=true` to have `json()` run `after()` itself, still exactly
+once. See [CONTROLLERS.md](CONTROLLERS.md#lifecycle-hooks).
 
 ## The legacy bridge
 

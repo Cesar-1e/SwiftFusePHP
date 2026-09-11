@@ -6,6 +6,7 @@ namespace SwiftFuse\Support;
 
 use BadMethodCallException;
 use Closure;
+use ReflectionFunction;
 
 /**
  * Extensible trait.
@@ -16,6 +17,11 @@ use Closure;
  *     Router::extend('apiResource', function (string $name) { ... });
  *     $router->apiResource('users');
  *
+ * An extension belongs to the class it was registered on: it is available on
+ * that class and its subclasses, but not on parent, sibling or unrelated
+ * classes. When a subclass registers a method with the same name, its own
+ * version wins for it and its descendants.
+ *
  * Registered closures are bound to the instance, so $this refers to the object.
  * This is SwiftFusePHP's take on a "macroable" object; the implementation is
  * original to this framework.
@@ -23,14 +29,14 @@ use Closure;
 trait Extensible
 {
     /**
-     * Registered extension closures, keyed by method name.
+     * Registered extension callbacks, keyed by the class they were registered on, then by method name.
      *
-     * @var array<string, callable>
+     * @var array<class-string, array<string, callable>>
      */
     protected static array $extensions = [];
 
     /**
-     * Register a new runtime method for this class.
+     * Register a new runtime method for this class and its subclasses.
      *
      * @param string $name Method name to expose.
      * @param callable $callback Implementation invoked when the method is called.
@@ -38,18 +44,18 @@ trait Extensible
      */
     public static function extend(string $name, callable $callback): void
     {
-        static::$extensions[$name] = $callback;
+        static::$extensions[static::class][$name] = $callback;
     }
 
     /**
-     * Determine whether an extension method has been registered.
+     * Determine whether an extension method is available on this class, directly or through a parent class.
      *
      * @param string $name Method name.
      * @return bool
      */
     public static function hasExtension(string $name): bool
     {
-        return isset(static::$extensions[$name]);
+        return self::resolveExtension($name) !== null;
     }
 
     /**
@@ -63,13 +69,16 @@ trait Extensible
      */
     public function __call(string $name, array $arguments): mixed
     {
-        if (!static::hasExtension($name)) {
+        $callback = self::resolveExtension($name);
+        if ($callback === null) {
             throw new BadMethodCallException(sprintf('Method %s::%s() does not exist.', static::class, $name));
         }
 
-        $callback = static::$extensions[$name];
         if ($callback instanceof Closure) {
-            $callback = Closure::bind($callback, $this, static::class);
+            // A static closure cannot receive $this; binding one to the instance would fail, so it only gets the scope.
+            $callback = (new ReflectionFunction($callback))->isStatic()
+                ? Closure::bind($callback, null, static::class)
+                : Closure::bind($callback, $this, static::class);
         }
 
         return $callback(...$arguments);
@@ -86,10 +95,28 @@ trait Extensible
      */
     public static function __callStatic(string $name, array $arguments): mixed
     {
-        if (!static::hasExtension($name)) {
+        $callback = self::resolveExtension($name);
+        if ($callback === null) {
             throw new BadMethodCallException(sprintf('Static method %s::%s() does not exist.', static::class, $name));
         }
 
-        return (static::$extensions[$name])(...$arguments);
+        return $callback(...$arguments);
+    }
+
+    /**
+     * Find the extension visible from the called class, from the class itself up to its ancestors.
+     *
+     * @param string $name Method name.
+     * @return callable|null The nearest registered callback, or null when none is visible.
+     */
+    private static function resolveExtension(string $name): ?callable
+    {
+        for ($class = static::class; $class !== false; $class = get_parent_class($class)) {
+            if (isset(static::$extensions[$class][$name])) {
+                return static::$extensions[$class][$name];
+            }
+        }
+
+        return null;
     }
 }

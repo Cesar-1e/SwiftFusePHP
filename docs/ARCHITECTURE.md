@@ -105,7 +105,10 @@ if a model starts orchestrating other models, introduce a service.
 - **Always use prepared statements** (`query()` + `bind()`); never concatenate
   input into SQL.
 - Use **transactions** for multi-statement operations
-  (`beginTransaction()`/`commit()`/`rollBack()`).
+  (`beginTransaction()`/`commit()`/`rollBack()`). When the statements belong to
+  several models, enable the shared connection (`DB_SHARED_CONNECTION=true`) and
+  wrap them in `Transaction::run()`, so they commit or roll back together — see
+  [DATABASE.md](DATABASE.md#transactions-across-models).
 - For larger domains, you may split persistence into repository-style classes
   under `app/Services/` (or `app/Repositories/`) that wrap a model/connection —
   the rest of the app then depends on that boundary, not on raw SQL.
@@ -155,6 +158,7 @@ SwiftFusePHP/
 ├── storage/             # private files, queued jobs, logs (outside web root)
 ├── bootstrap/           # autoloader + application bootstrap
 ├── docs/                # documentation
+├── tests/               # framework test scripts (php tests/run.php)
 └── fuse                 # command-line tool
 ```
 

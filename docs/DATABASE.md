@@ -112,6 +112,118 @@ runs; outside a transaction it returns `false` and stores the error
 `runInTransaction(string $sql)` is a shortcut for a single statement, and
 `inTransaction()` tells you whether one is active.
 
+## Transactions across models
+
+By default every model opens its **own** connection, so the models of a request
+cannot share a transaction: committing one never includes the writes of another.
+When an operation spans several models — an invoice and its lines, a standard
+record and its custom fields — enable the **shared connection** and wrap the work
+in `SwiftFuse\Database\Transaction::run()`.
+
+### 1. Enable the shared connection
+
+```dotenv
+DB_SHARED_CONNECTION=true
+```
+
+`database.shared_connection` is `false` by default, which keeps the
+one-connection-per-model behavior of earlier versions. When it is `true`:
+
+- Every `Connection` of the process reuses **one PDO handle per DSN and user**,
+  so all models talk to the same database session.
+- Each instance still keeps its **own** prepared statement, execution state and
+  last error, so models never read each other's results.
+- `inTransaction()` reports the transaction of the shared session, whichever
+  instance opened it.
+- `lastInsertId()` belongs to the session as well: read it right after your insert.
+
+> Projects that keep their own copy of `config/database.php` must add the key for
+> the variable to take effect:
+> `'shared_connection' => (bool) env('DB_SHARED_CONNECTION', false),`
+
+### 2. Run the work in a transaction
+
+```php
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use SwiftFuse\Database\Transaction;
+
+$invoiceId = Transaction::run(function () use ($data): int {
+    $invoiceId = (new Invoice())->create($data);
+    (new InvoiceLine())->createMany($invoiceId, $data['lines']);
+
+    return $invoiceId;
+});
+```
+
+`run()` begins a transaction, runs the callback and then:
+
+- **commits** when the callback returns, and returns the callback's value;
+- **rolls back and rethrows** the same exception when the callback throws any
+  `Throwable`.
+
+The callback receives the `Connection` that opened the transaction, handy for SQL
+that does not belong to a model. Do not commit or roll back that level yourself:
+return or throw instead.
+
+When the shared connection is disabled, `run()` throws a `LogicException` rather
+than pretending that separate connections are atomic.
+
+### Nesting
+
+Calls nest, and only the **outermost** level commits or rolls back:
+
+- An inner `Transaction::run()` joins the open transaction; returning from it
+  commits nothing yet.
+- An exception that escapes an inner level reaches the outer callback; if it keeps
+  propagating, the outer level rolls everything back.
+- If the outer callback **catches** the failure of an inner level, the transaction
+  can no longer commit: the outer level rolls everything back and throws a
+  `RuntimeException`. A partial write is never committed.
+
+Existing models that manage their own transaction keep working inside `run()`. On
+a shared handle, `beginTransaction()` opens a nested level, `commit()` closes it
+without committing, and `rollBack()` marks the whole transaction for rollback. A
+connection that did not begin the transaction cannot end it: its `commit()`
+returns `false` and its `rollBack()` only marks the transaction for rollback.
+
+### How `execute()` behaves inside the shared transaction
+
+`execute()` keeps its contract: **outside** a transaction it catches the
+`PDOException`, records the message (`getError()`) and returns `false`; **inside**
+a transaction it rethrows the exception.
+
+With the shared connection, *inside* means inside the transaction of the shared
+session, whoever opened it. So a model method that returns `false` on its own
+**throws** when it runs within `Transaction::run()`. That is the desired behavior:
+
+- A `false` return would let the callback carry on and commit a partial result,
+  such as an invoice without its lines. The exception unwinds the callback
+  instead, so `run()` rolls back the writes of every model.
+- MySQL usually undoes only the failed statement and keeps the transaction open,
+  so the earlier writes stay pending until someone rolls back explicitly;
+  rethrowing is what triggers that rollback.
+- The caller receives the real database error instead of a silent `false`.
+
+For the same reason, a model that catches `PDOException` to degrade gracefully
+(like `Person::all()` above) should rethrow it when `inTransaction()` is true.
+
+### Things to keep in mind
+
+- **Respond after the transaction.** `json()` ends the script: called inside the
+  callback, it leaves the transaction open and PHP rolls it back on shutdown, so
+  the client would get a success response for discarded data. Return what you
+  need from the callback and respond once `run()` has returned.
+- **Long-running processes.** A worker keeps the shared handle for its whole life.
+  Call `Connection::flushSharedConnections()` between jobs so the next job opens a
+  fresh handle; it throws a `LogicException` while a shared transaction is open.
+
+| Member | Description |
+|--------|-------------|
+| `Transaction::run(callable $callback): mixed` | Run the callback in a transaction on the shared connection. |
+| `Connection::isSharingEnabled(): bool` | Whether `database.shared_connection` is enabled. |
+| `Connection::flushSharedConnections(): void` | Forget the shared handles, e.g. between the jobs of a worker. |
+
 ## Error handling
 
 - `Connection::getError()` returns the last connection/execution error message.
