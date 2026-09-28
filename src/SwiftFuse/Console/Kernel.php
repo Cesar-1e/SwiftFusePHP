@@ -95,6 +95,8 @@ final class Kernel
     /**
      * Process a single serialized job file (used by the async queue driver).
      *
+     * Only files located directly in the queue directory are accepted.
+     *
      * @param array<int, string> $arguments CLI arguments; the first is the job file.
      * @return int Exit code.
      */
@@ -106,7 +108,21 @@ final class Kernel
             return 1;
         }
 
-        return (new Worker(new QueueManager()))->runFile($file) ? 0 : 1;
+        $queue = new QueueManager();
+        $path = realpath($file);
+        $jobsPath = realpath($queue->jobsPath());
+
+        if ($path === false) {
+            $this->line("Job file not found: {$file}");
+            return 1;
+        }
+
+        if ($jobsPath === false || dirname($path) !== $jobsPath) {
+            $this->line("Refusing to run {$file}: job files must be inside {$queue->jobsPath()}.");
+            return 1;
+        }
+
+        return (new Worker($queue))->runFile($path) ? 0 : 1;
     }
 
     /**
@@ -387,7 +403,7 @@ final class Kernel
         $this->line("Available commands:");
         $this->line("  key:generate              Generate and set APP_KEY in .env");
         $this->line("  queue:work [--daemon]     Process pending background jobs");
-        $this->line("  queue:run <file>          Process a single job file");
+        $this->line("  queue:run <file>          Process a single job file from the queue directory");
         $this->line("  make:controller <Name>    Create a new App\\Controllers class");
         $this->line("  make:job <Name>           Create a new App\\Jobs class");
         $this->line("  assets:publish            Publish third-party assets to public/");

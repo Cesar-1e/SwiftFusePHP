@@ -3,6 +3,77 @@
 All notable changes to SwiftFusePHP are documented in this file. The project
 follows [Semantic Versioning](https://semver.org/).
 
+## [0.11.0] - 2026-09-28
+
+A job queue that is safe for long-running, non-idempotent jobs such as bulk
+imports: every job runs exactly once, jobs interrupted by a dead worker are set
+aside instead of retried, and a new `deferred` driver starts jobs right after
+the response on shared hosting without `exec()`. With the default configuration
+(`QUEUE_DRIVER=file`), applications built on 0.10.0 keep their behavior, now
+with the reservation protecting them.
+
+### Added
+
+- **Exclusive job reservation.** Before running a job, `Worker` takes an
+  exclusive, non-blocking `flock()` on its `.job` file and, holding it, renames it
+  to `.job.running`; the lock is kept while `handle()` runs. Only one process
+  runs a given job, however many crons, daemons, `queue:run` calls or deferred
+  requests overlap. See [docs/QUEUE.md](docs/QUEUE.md#4-reservation-every-job-runs-once).
+- **Interrupted jobs.** At the start of `Worker::work()`, a `.running` file whose
+  lock is free (its worker died) is moved to `failed/` with the reason
+  `Worker interrupted` and logged. It is not retried automatically.
+- **`deferred` queue driver.** `QUEUE_DRIVER=deferred` writes the job like `file`
+  and, under PHP-FPM or LiteSpeed, runs it after the response has been sent
+  (`fastcgi_finish_request()` / `litespeed_finish_request()`), even when the
+  controller ends with `exit`. Jobs of one request run in dispatch order after a
+  single finish call; their failures go to `failed/` and the log, never to the
+  response. Without a finish function, and on the CLI, it behaves like `file`.
+- `QueueManager::logPath()`, `QueueManager::log()` and
+  `QueueManager::execAvailable()`, an optional second constructor argument that
+  replaces the `exec()` availability check, the `Worker::INTERRUPTED` constant,
+  and the `queue.log` setting (default `storage/logs/queue.log`).
+- Queue tests in `tests/queue-test.php`, with real concurrent processes and a
+  deferred request served by PHP's built-in server. `PhpProcess` gained
+  `start()`/`wait()` and php.ini settings for child processes.
+
+### Changed
+
+- `Worker::work()` counts only the jobs it ran; jobs reserved by another process
+  are skipped silently.
+- `Worker::runFile()` reserves the job first and returns `false` without moving
+  it to `failed/` when another process holds it, or when given a `.running` file.
+- `QueueManager::dispatch()` writes the payload to a temporary file and renames
+  it into place, so a worker never reads a half-written job.
+- `php fuse queue:run` only accepts files located directly in the queue
+  directory (resolved with `realpath()`); other paths exit with code 1 and a
+  message. See [docs/CLI.md](docs/CLI.md#queuerun-job-file).
+
+### Fixed
+
+- A job could run twice or more in parallel: the cron of the next minute, a
+  daemon or the `async` process picked up a job that was still running, because
+  its file was only removed at the end.
+- With `QUEUE_DRIVER=async` and `exec()` in `disable_functions`, `dispatch()`
+  threw an `Error` after saving the job. The driver now checks `exec()` first,
+  falls back to `deferred`, and logs one warning per process.
+- `php fuse queue:run` ran, and on failure moved into `failed/`, any file it was
+  given, including files outside the queue directory.
+
+### Upgrading from 0.10.0
+
+No change is required: pending `.job` files written by 0.10.0 are processed as
+before. Recommended:
+
+1. On shared hosting without `exec()`, set `QUEUE_DRIVER=deferred`, and keep the
+   `php fuse queue:work` cron every minute with every driver.
+2. If your project keeps its own `config/queue.php`, optionally add
+   `'log' => storage_path('logs/queue.log')`; the default is the same file.
+3. Watch `storage/framework/jobs/failed/` for `Worker interrupted` entries, and
+   check whether each job ran partly before requeuing it.
+
+`queue:work` now reports only the jobs it ran, and `queue:run` refuses paths
+outside the queue directory.
+
 ## [0.10.0] - 2026-09-11
 
 Native support for extending applications without touching standard files:

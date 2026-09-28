@@ -24,7 +24,8 @@ php fuse key:generate
 ### `queue:work [--daemon]`
 
 Process pending background jobs. Without flags it processes the current backlog
-and exits (ideal for cron); with `--daemon` it runs continuously.
+and exits (ideal for cron); with `--daemon` it runs continuously. Jobs that
+another process is running are skipped and not counted.
 
 ```bash
 php fuse queue:work
@@ -37,6 +38,20 @@ See [QUEUE.md](QUEUE.md).
 
 Process a single serialized job file. Used internally by the `async` queue
 driver; you rarely call it directly.
+
+The file must be directly inside the queue directory (`queue.path`, by default
+`storage/framework/jobs/`); the path is resolved with `realpath()`, so `..` and
+symlinks cannot escape it. Other paths, including `failed/`, are refused with an
+error message and exit code 1:
+
+```text
+$ php fuse queue:run /tmp/payload.job
+Refusing to run /tmp/payload.job: job files must be inside /var/www/app/storage/framework/jobs.
+```
+
+The job is reserved like in `queue:work`, so it never runs twice. The exit code
+is 1 when the file is missing, the job failed, or another process already
+reserved it.
 
 ### `make:controller <Name>`
 

@@ -14,7 +14,7 @@ return [
     'name'     => env('APP_NAME', 'SwiftFusePHP'),
     'env'      => env('APP_ENV', 'production'),
     'debug'    => (bool) env('APP_DEBUG', false),
-    'version'  => env('APP_VERSION', '0.10.0'),
+    'version'  => env('APP_VERSION', '0.11.0'),
 
     // Base URL used to build absolute links and signed URLs.
     'url'      => env('APP_URL', 'http://localhost'),

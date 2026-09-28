@@ -37,7 +37,7 @@ env('APP_DEBUG', false);        // casts "true"/"false"/"null" to native types
 | `APP_NAME` | `SwiftFusePHP` | Application name. |
 | `APP_ENV` | `production` | Environment name (`local`, `production`, …). |
 | `APP_DEBUG` | `false` | Verbose errors when `true`. Set `false` in production. |
-| `APP_VERSION` | `0.10.0` | Application version string. |
+| `APP_VERSION` | `0.11.0` | Application version string. |
 | `APP_URL` | `http://localhost` | Base URL used by `base_url()` and signed URLs. |
 | `APP_LOCALE` | `en` | Locale for `SwiftFuse\Support\Format` (ICU). |
 | `APP_TIMEZONE` | `UTC` | Default timezone. |
@@ -55,7 +55,7 @@ env('APP_DEBUG', false);        // casts "true"/"false"/"null" to native types
 | `DB_SHARED_CONNECTION` | `false` | When `true`, every model shares one PDO handle, as `Transaction::run()` requires. See [DATABASE.md](DATABASE.md#transactions-across-models). |
 | `STORAGE_ACCEL` | `none` | Protected delivery: `none`, `apache`, `nginx`. |
 | `STORAGE_NGINX_INTERNAL` | `/protected/` | Internal location for X-Accel-Redirect. |
-| `QUEUE_DRIVER` | `file` | Background queue driver: `file` or `async`. |
+| `QUEUE_DRIVER` | `file` | Background queue driver: `file`, `async` or `deferred`. See [QUEUE.md](QUEUE.md#drivers). |
 | `RECAPTCHA_KEY` | *(empty)* | Optional reCAPTCHA secret. |
 
 ## `config/` files
@@ -68,7 +68,7 @@ and read them with `config('mail.host')`.
 | [`config/app.php`](../config/app.php) | core, helpers | `name`, `env`, `debug`, `url`, `locale`, `timezone`, `key`, `json_lifecycle` |
 | [`config/database.php`](../config/database.php) | `SwiftFuse\Database\Connection` | `driver`, `host`, `port`, `database`, `username`, `password`, `charset`, `persistent`, `ssl_ca`, `shared_connection` |
 | [`config/storage.php`](../config/storage.php) | `SwiftFuse\Storage\StorageManager` | `root`, `accel`, `nginx_internal` |
-| [`config/queue.php`](../config/queue.php) | `SwiftFuse\Queue\*` | `driver`, `path`, `php_binary` |
+| [`config/queue.php`](../config/queue.php) | `SwiftFuse\Queue\*` | `driver`, `path`, `php_binary`, `log` |
 | [`config/assets.php`](../config/assets.php) | `php fuse assets:publish` | `source => destination` map for third-party assets |
 | [`config/services.php`](../config/services.php) | the service container | maps a contract/class → factory closure |
 

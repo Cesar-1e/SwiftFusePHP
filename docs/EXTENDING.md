@@ -192,7 +192,8 @@ app(QueueManager::class)->dispatch(new App\Jobs\SendWelcomeEmail($userId));
 ```
 
 Process pending jobs: `php fuse queue:work` (or `--daemon`). Set
-`QUEUE_DRIVER=async` to also run each job immediately in a detached process.
+`QUEUE_DRIVER=async` to also run each job immediately in a detached process, or
+`QUEUE_DRIVER=deferred` to run it after the response on PHP-FPM or LiteSpeed.
 
 ## Protected files
 

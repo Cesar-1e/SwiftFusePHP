@@ -6,7 +6,7 @@
 
 Boost productivity with its modular architecture and smooth integration capabilities.
 
-`PHP 8.4` · `PSR-4` · `MVC` · `PDO` · `version 0.10.0`
+`PHP 8.4` · `PSR-4` · `MVC` · `PDO` · `version 0.11.0`
 
 </div>
 
@@ -66,7 +66,7 @@ It is designed around four principles:
 | **Routing** | Convention-based (`/{controller}/{method}/{params}`) plus optional explicit routes with `{placeholders}`. |
 | **Protected files** | `StorageManager` streams private files only after authorization, via X-Sendfile / X-Accel-Redirect or chunked HTTP **Range** streaming. |
 | **Signed URLs** | Short-lived, tamper-proof links (HMAC) to embed protected media in HTML. |
-| **Background queue** | File-based job queue + `fuse queue:work` worker, with an optional fire-and-forget `async` driver. |
+| **Background queue** | File-based job queue + `fuse queue:work` worker, with exclusive job reservation and optional `async` (detached process) or `deferred` (after the response) drivers. |
 | **CLI** | `fuse` tool: `key:generate`, `queue:work`, `make:controller`, `make:job`. |
 | **Extensibility** | Inheritance, a service container that also resolves controllers, per-class runtime macros (`Extensible`) and hooks/events with priorities and filters. |
 
@@ -295,4 +295,4 @@ It will be removed in `1.0`. See [docs/MIGRATION.md](docs/MIGRATION.md).
 
 See [LICENSE](LICENSE).
 
-<div align="center"><sub>SwiftFusePHP · version 0.10.0</sub></div>
+<div align="center"><sub>SwiftFusePHP · version 0.11.0</sub></div>
