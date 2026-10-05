@@ -37,7 +37,7 @@ env('APP_DEBUG', false);        // casts "true"/"false"/"null" to native types
 | `APP_NAME` | `SwiftFusePHP` | Application name. |
 | `APP_ENV` | `production` | Environment name (`local`, `production`, …). |
 | `APP_DEBUG` | `false` | Verbose errors when `true`. Set `false` in production. |
-| `APP_VERSION` | `0.11.0` | Application version string. |
+| `APP_VERSION` | `0.12.0` | Application version string. |
 | `APP_URL` | `http://localhost` | Base URL used by `base_url()` and signed URLs. |
 | `APP_LOCALE` | `en` | Locale for `SwiftFuse\Support\Format` (ICU). |
 | `APP_TIMEZONE` | `UTC` | Default timezone. |
@@ -70,6 +70,7 @@ and read them with `config('mail.host')`.
 | [`config/storage.php`](../config/storage.php) | `SwiftFuse\Storage\StorageManager` | `root`, `accel`, `nginx_internal` |
 | [`config/queue.php`](../config/queue.php) | `SwiftFuse\Queue\*` | `driver`, `path`, `php_binary`, `log` |
 | [`config/assets.php`](../config/assets.php) | `php fuse assets:publish` | `source => destination` map for third-party assets |
+| [`config/console.php`](../config/console.php) | `SwiftFuse\Console\Kernel` (`php fuse`) | `commands`: application command classes |
 | [`config/services.php`](../config/services.php) | the service container | maps a contract/class → factory closure |
 
 An environment variable only takes effect through the config file that reads it.

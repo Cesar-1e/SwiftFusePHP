@@ -195,6 +195,25 @@ Process pending jobs: `php fuse queue:work` (or `--daemon`). Set
 `QUEUE_DRIVER=async` to also run each job immediately in a detached process, or
 `QUEUE_DRIVER=deferred` to run it after the response on PHP-FPM or LiteSpeed.
 
+## Console commands
+
+Add your own `php fuse` commands from the application: implement
+`SwiftFuse\Contracts\CommandInterface` (or run `php fuse make:command <Name>`) and
+list the class in `config/console.php`:
+
+```php
+// config/console.php
+return [
+    'commands' => [
+        App\Console\GenerateMonthlyReport::class,   // php fuse reports:monthly
+    ],
+];
+```
+
+Built-in commands always take precedence and cannot be replaced. Run commands
+periodically from cron; the framework has no scheduler. See
+[CLI.md](CLI.md#application-commands).
+
 ## Protected files
 
 Put private files under `storage/app/` (outside the web root) and serve them only

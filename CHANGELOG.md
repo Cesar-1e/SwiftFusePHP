@@ -3,6 +3,46 @@
 All notable changes to SwiftFusePHP are documented in this file. The project
 follows [Semantic Versioning](https://semver.org/).
 
+## [0.12.0] - 2026-10-05
+
+Applications can add their own commands to `php fuse` without modifying the
+framework, e.g. `php fuse reports:monthly` run monthly from cron. Backwards
+compatible: a project without `config/console.php` keeps its CLI behavior.
+
+### Added
+
+- **Application commands.** `SwiftFuse\Contracts\CommandInterface`
+  (`name()`, `description()`, `handle(array $arguments): int`) and the
+  `console.commands` setting in the new `config/console.php`, a list of command
+  classes. The console kernel runs a registered command when no built-in command
+  has that name, passing the arguments after the name and returning its exit
+  code. See [docs/CLI.md](docs/CLI.md#application-commands).
+- Validation of the registry, with a message on STDERR and exit code 1: the
+  class must exist, implement `CommandInterface` and be creatable without
+  arguments, and its name must match `/^[a-z][a-z0-9-]*(:[a-z0-9-]+)*$/`,
+  not be a built-in command and not be registered twice. An uncaught exception
+  in `handle()` prints `Command <name> failed: <message>` and exits with 1.
+- `php fuse list` shows an **Application commands** section, in alphabetical
+  order, when commands are registered.
+- `php fuse make:command <Name>` scaffolds `app/Console/<Name>.php` and reminds
+  you to register it in `config/console.php`.
+- A cron example for periodic commands in [docs/CLI.md](docs/CLI.md#running-a-command-periodically-cron),
+  and a *Console commands* section in [docs/EXTENDING.md](docs/EXTENDING.md).
+- Console tests in `tests/console-commands-test.php`.
+
+### Changed
+
+- Built-in commands keep priority and never load the command registry; their
+  behavior is unchanged. `make:command` is the new built-in, listed by
+  `php fuse list`.
+
+### Upgrading from 0.11.0
+
+No action is required. To add commands, copy `config/console.php` into the
+project (it is optional; without it `console.commands` is empty) and list your
+command classes under `commands`. Set `APP_VERSION=0.12.0` in `.env` if you track
+it there.
+
 ## [0.11.0] - 2026-09-28
 
 A job queue that is safe for long-running, non-idempotent jobs such as bulk

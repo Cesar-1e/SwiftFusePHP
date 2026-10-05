@@ -190,7 +190,8 @@ A clear boundary separates **framework internals** (do not edit) from **your cod
 
 **Generated scaffolds — yours once created:**
 
-Commands like `php fuse make:controller` and `php fuse make:job` generate a
+Commands like `php fuse make:controller`, `php fuse make:job` and
+`php fuse make:command` generate a
 starting file under `app/`. The generated file is a **starting point you own** —
 edit it freely; it is not regenerated.
 

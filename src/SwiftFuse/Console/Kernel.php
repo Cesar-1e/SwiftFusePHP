@@ -7,18 +7,45 @@ namespace SwiftFuse\Console;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RuntimeException;
+use SwiftFuse\Contracts\CommandInterface;
 use SwiftFuse\Queue\QueueManager;
 use SwiftFuse\Queue\Worker;
+use Throwable;
 
 /**
  * Console kernel for the "fuse" command-line tool.
  *
  * Dispatches CLI commands that boost developer productivity: generating the app
- * key, running the queue worker, and scaffolding controllers/jobs. The command
- * set is intentionally small and easy to extend.
+ * key, running the queue worker, and scaffolding controllers/jobs/commands. The
+ * built-in command set is intentionally small; applications add their own
+ * commands (CommandInterface) by listing them in config/console.php.
  */
 final class Kernel
 {
+    /**
+     * Names of the built-in commands. They take precedence over application
+     * commands, which cannot reuse them.
+     *
+     * @var array<int, string>
+     */
+    private const BUILT_IN_COMMANDS = [
+        'key:generate',
+        'queue:work',
+        'queue:run',
+        'make:controller',
+        'make:job',
+        'make:command',
+        'assets:publish',
+        'list',
+    ];
+
+    /**
+     * Pattern a command name must match, e.g. "reports:monthly".
+     *
+     * @var string
+     */
+    private const COMMAND_NAME_PATTERN = '/^[a-z][a-z0-9-]*(:[a-z0-9-]+)*$/';
+
     /**
      * Run the console application for the given CLI arguments.
      *
@@ -36,10 +63,123 @@ final class Kernel
             'queue:run'        => $this->queueRun($arguments),
             'make:controller'  => $this->makeController($arguments),
             'make:job'         => $this->makeJob($arguments),
+            'make:command'     => $this->makeCommand($arguments),
             'assets:publish'   => $this->assetsPublish($arguments),
             'list', '--help', '-h' => $this->listCommands(),
-            default            => $this->unknown($command),
+            default            => $this->runApplicationCommand($command, $arguments),
         };
+    }
+
+    /**
+     * Run a command registered by the application in config/console.php.
+     *
+     * Falls back to the "unknown command" report when no registered command has
+     * the given name. An uncaught exception from the command is reported on STDERR.
+     *
+     * @param string $command The command name typed after "fuse".
+     * @param array<int, string> $arguments CLI arguments that follow the command name.
+     * @return int Exit code (1 when the registry is invalid or the command failed).
+     */
+    private function runApplicationCommand(string $command, array $arguments): int
+    {
+        $commands = $this->applicationCommands();
+        if ($commands === null) {
+            return 1;
+        }
+
+        if (!isset($commands[$command])) {
+            return $this->unknown($command);
+        }
+
+        try {
+            return $commands[$command]->handle($arguments);
+        } catch (Throwable $exception) {
+            $this->error("Command {$command} failed: " . $exception->getMessage());
+            return 1;
+        }
+    }
+
+    /**
+     * Load and validate the application commands listed in config("console.commands").
+     *
+     * Every entry must be an existing class implementing CommandInterface that can
+     * be created without arguments, with a valid name that is neither a built-in
+     * command nor used by another entry. Every problem found is reported on STDERR.
+     *
+     * @return array<string, CommandInterface>|null Commands keyed by name, or null when any entry is invalid.
+     */
+    private function applicationCommands(): ?array
+    {
+        $classes = config('console.commands', []);
+        if (!is_array($classes)) {
+            $this->error('Invalid config/console.php: "commands" must be a list of class names.');
+            return null;
+        }
+
+        /** @var array<string, CommandInterface> $commands */
+        $commands = [];
+        /** @var array<string, string> $owners Class that registered each name. */
+        $owners = [];
+        $valid = true;
+
+        foreach ($classes as $class) {
+            if (!is_string($class) || $class === '') {
+                $this->error('Invalid console command entry: ' . get_debug_type($class) . ' is not a class name.');
+                $valid = false;
+                continue;
+            }
+
+            if (!class_exists($class)) {
+                $this->error("Console command class {$class} does not exist.");
+                $valid = false;
+                continue;
+            }
+
+            if (!is_subclass_of($class, CommandInterface::class)) {
+                $this->error("Console command class {$class} must implement " . CommandInterface::class . '.');
+                $valid = false;
+                continue;
+            }
+
+            try {
+                /** @var CommandInterface $instance */
+                $instance = new $class();
+                $name = $instance->name();
+            } catch (Throwable $exception) {
+                $this->error("Console command class {$class} could not be created: " . $exception->getMessage());
+                $valid = false;
+                continue;
+            }
+
+            if (preg_match(self::COMMAND_NAME_PATTERN, $name) !== 1) {
+                $this->error("Console command {$class} has an invalid name \"{$name}\"; use lowercase segments like \"reports:monthly\".");
+                $valid = false;
+                continue;
+            }
+
+            if (in_array($name, self::BUILT_IN_COMMANDS, true)) {
+                $this->error("Console command {$class} cannot use the name \"{$name}\": it is a built-in command.");
+                $valid = false;
+                continue;
+            }
+
+            if (isset($owners[$name])) {
+                $this->error("Console command name \"{$name}\" is registered twice: {$owners[$name]} and {$class}.");
+                $valid = false;
+                continue;
+            }
+
+            $owners[$name] = $class;
+            $commands[$name] = $instance;
+        }
+
+        if (!$valid) {
+            return null;
+        }
+
+        ksort($commands, SORT_STRING);
+
+        return $commands;
     }
 
     /**
@@ -214,6 +354,87 @@ final class Kernel
         PHP;
 
         return $this->writeStub($path, $stub, $class);
+    }
+
+    /**
+     * Scaffold a new console command in app/Console.
+     *
+     * @param array<int, string> $arguments CLI arguments; the first is the class name.
+     * @return int Exit code.
+     */
+    private function makeCommand(array $arguments): int
+    {
+        $class = $this->studly($arguments[0] ?? '');
+        if ($class === '') {
+            $this->line("Usage: fuse make:command <Name>");
+            return 1;
+        }
+
+        if (preg_match('/^[A-Z][A-Za-z0-9]*$/', $class) !== 1) {
+            $this->line("Invalid class name: {$class}");
+            return 1;
+        }
+
+        // Suggested name: "GenerateReportCommand" -> "app:generate-report" (edit it in the class).
+        $base = preg_replace('/Command$/', '', $class) ?: $class;
+        $name = 'app:' . strtolower((string) preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', '-', $base));
+        $path = app_path("Console/{$class}.php");
+
+        $stub = <<<PHP
+        <?php
+
+        declare(strict_types=1);
+
+        namespace App\\Console;
+
+        use SwiftFuse\\Contracts\\CommandInterface;
+
+        /**
+         * {$class} console command.
+         */
+        final class {$class} implements CommandInterface
+        {
+            /**
+             * The name used to call the command: php fuse {$name}
+             *
+             * @return string
+             */
+            public function name(): string
+            {
+                return '{$name}';
+            }
+
+            /**
+             * One-line description shown by "php fuse list".
+             *
+             * @return string
+             */
+            public function description(): string
+            {
+                return 'TODO: describe the command';
+            }
+
+            /**
+             * Execute the command.
+             *
+             * @param array<int, string> \$arguments CLI arguments that follow the command name.
+             * @return int Process exit code (0 = success).
+             */
+            public function handle(array \$arguments): int
+            {
+                // TODO: implement the command logic.
+                return 0;
+            }
+        }
+
+        PHP;
+
+        $result = $this->writeStub($path, $stub, $class);
+        if ($result === 0) {
+            $this->line("Register it in config/console.php: 'commands' => [App\\Console\\{$class}::class]");
+        }
+
+        return $result;
     }
 
     /**
@@ -406,8 +627,22 @@ final class Kernel
         $this->line("  queue:run <file>          Process a single job file from the queue directory");
         $this->line("  make:controller <Name>    Create a new App\\Controllers class");
         $this->line("  make:job <Name>           Create a new App\\Jobs class");
+        $this->line("  make:command <Name>       Create a new App\\Console command class");
         $this->line("  assets:publish            Publish third-party assets to public/");
         $this->line("      [--force] [--link]      --force overwrites, --link symlinks (copy fallback)");
+
+        $commands = $this->applicationCommands();
+        if ($commands === null) {
+            return 1;
+        }
+
+        if ($commands !== []) {
+            $this->line("");
+            $this->line("Application commands:");
+            foreach ($commands as $name => $command) {
+                $this->line(sprintf('  %-25s %s', $name, $command->description()));
+            }
+        }
 
         return 0;
     }
@@ -471,5 +706,16 @@ final class Kernel
     private function line(string $message): void
     {
         fwrite(STDOUT, $message . PHP_EOL);
+    }
+
+    /**
+     * Write a line to standard error.
+     *
+     * @param string $message The message to print.
+     * @return void
+     */
+    private function error(string $message): void
+    {
+        fwrite(STDERR, $message . PHP_EOL);
     }
 }
